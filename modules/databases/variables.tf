@@ -21,4 +21,3 @@ variable "sql_admin_user" {
 variable "pg_admin_user" {
   type = string
 }
-
