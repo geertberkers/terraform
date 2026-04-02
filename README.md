@@ -208,6 +208,17 @@ Configure in GitHub → Settings → Secrets:
 | ARM_TENANT_ID | Azure tenant |
 | SSH_PUBLIC_KEY | SSH key |
 
+REPO="OWNER/REPO"
+
+gh secret set MYSQL_ADMIN_USER --body "adminuser" --repo $REPO
+gh secret set MYSQL_ADMIN_PASSWORD --body "password" --repo $REPO
+
+gh secret set SQL_ADMIN_USER --body "sqladmin" --repo $REPO
+gh secret set SQL_ADMIN_PASSWORD --body "password" --repo $REPO
+
+gh secret set PG_ADMIN_USER --body "pgadmin" --repo $REPO
+gh secret set PG_ADMIN_PASSWORD --body "password" --repo $REPO
+
 ---
 
 # ⚙️ setup_github_secrets.sh

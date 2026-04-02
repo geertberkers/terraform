@@ -16,6 +16,14 @@ env:
   ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
   ARM_USE_OIDC: "true"
 
+  TF_VAR_mysql_admin_user: ${{ secrets.MYSQL_ADMIN_USER }}
+  TF_VAR_mysql_admin_password: ${{ secrets.MYSQL_ADMIN_PASSWORD }}
+
+  TF_VAR_sql_admin_user: ${{ secrets.SQL_ADMIN_USER }}
+  TF_VAR_sql_admin_password: ${{ secrets.SQL_ADMIN_PASSWORD }}
+
+  TF_VAR_pg_admin_user: ${{ secrets.PG_ADMIN_USER }}
+  TF_VAR_pg_admin_password: ${{ secrets.PG_ADMIN_PASSWORD }}
 jobs:
   terraform:
     name: Terraform Plan & Apply
