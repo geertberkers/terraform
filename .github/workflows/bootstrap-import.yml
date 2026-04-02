@@ -43,11 +43,22 @@ jobs:
       - name: Terraform Init
         run: terraform init -reconfigure -input=false -lock-timeout=10m
 
+
+      # =========================
+      # IMPORT COSMOS DB
+      # =========================
+      - name: Import Cosmos DB
+        run: |
+          terraform import module.databases.azurerm_cosmosdb_account.cosmos 
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-databases-europe/providers/Microsoft.DocumentDB/databaseAccounts/cosmos-global
+
+
       # =========================
       # IMPORT RESOURCE GROUPS
       # =========================
       - name: Import Resource Groups
         run: |
+
           terraform import module.switzerland.azurerm_resource_group.rg \
             /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north || true
 

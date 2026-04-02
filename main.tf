@@ -74,7 +74,7 @@ module "databases" {
   source = "./modules/databases"
 
   resource_group_name = "rg-databases-europe"
-  location            = "westeurope"
+  location            = "swedencentral"
   env                 = "global"
 
   mysql_admin_user     = var.mysql_admin_user

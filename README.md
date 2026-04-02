@@ -210,14 +210,14 @@ Configure in GitHub → Settings → Secrets:
 
 REPO="OWNER/REPO"
 
-gh secret set MYSQL_ADMIN_USER --body "adminuser" --repo $REPO
-gh secret set MYSQL_ADMIN_PASSWORD --body "password" --repo $REPO
+gh secret set MYSQL_ADMIN_USER --body 'adminuser' --repo $REPO
+gh secret set MYSQL_ADMIN_PASSWORD --body 'MySql!2026Secure' --repo $REPO
 
-gh secret set SQL_ADMIN_USER --body "sqladmin" --repo $REPO
-gh secret set SQL_ADMIN_PASSWORD --body "password" --repo $REPO
+gh secret set SQL_ADMIN_USER --body 'sqladmin' --repo $REPO
+gh secret set SQL_ADMIN_PASSWORD --body 'Sql!2026Secure' --repo $REPO
 
-gh secret set PG_ADMIN_USER --body "pgadmin" --repo $REPO
-gh secret set PG_ADMIN_PASSWORD --body "password" --repo $REPO
+gh secret set PG_ADMIN_USER --body 'pgadmin' --repo $REPO
+gh secret set PG_ADMIN_PASSWORD --body 'Pg!2026Secure' --repo $REPO
 
 ---
 
