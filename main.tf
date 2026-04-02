@@ -7,10 +7,18 @@ terraform {
       version = "~> 3.0"
     }
   }
+
+  # Backend stays in backend.tf
 }
 
+# =========================
+# AZURE PROVIDER (FIXED)
+# =========================
 provider "azurerm" {
   features {}
+
+  # 🔥 REQUIRED for GitHub OIDC authentication
+  use_oidc = true
 }
 
 variable "ssh_public_key" {
@@ -36,7 +44,6 @@ module "switzerland" {
   ]
 
   ssh_public_key = var.ssh_public_key
-
 }
 
 # =========================
