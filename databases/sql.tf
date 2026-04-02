@@ -4,13 +4,28 @@ resource "azurerm_mssql_server" "sql" {
   location                     = var.location
 
   administrator_login          = var.sql_admin_user
-  administrator_login_password  = var.sql_admin_password
+  administrator_login_password = var.sql_admin_password
 
   version = "12.0"
+
+  minimum_tls_version = "1.2"
+}
+
+# Allow Azure services (required for connectivity in most setups)
+resource "azurerm_mssql_firewall_rule" "allow_azure_services" {
+  name             = "allow-azure-services"
+  server_id        = azurerm_mssql_server.sql.id
+  start_ip_address = "0.0.0.0"
+  end_ip_address   = "0.0.0.0"
 }
 
 resource "azurerm_mssql_database" "db" {
   name      = "appdb"
   server_id = azurerm_mssql_server.sql.id
-  sku_name  = "Basic"
+
+  sku_name = "Basic"
+
+  depends_on = [
+    azurerm_mssql_server.sql
+  ]
 }

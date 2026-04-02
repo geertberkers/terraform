@@ -11,12 +11,25 @@ resource "azurerm_mysql_flexible_server" "mysql" {
 
   storage_mb            = 32768
   backup_retention_days = 7
+
+  # required in newer provider versions
+  zone = "1"
 }
 
-resource "azurerm_mysql_flexible_database" "db" {
-  name                = "appdb"
-  resource_group_name = var.resource_group_name
-  server_name         = azurerm_mysql_flexible_server.mysql.name
-  charset             = "utf8mb4"
-  collation           = "utf8mb4_unicode_ci"
+# NOTE:
+# azurerm_mysql_flexible_database DOES NOT EXIST in azurerm provider.
+# Databases must be created manually or via SQL execution.
+
+# Optional: create database via init script (only works if mysql client available)
+resource "null_resource" "mysql_init_db" {
+  depends_on = [azurerm_mysql_flexible_server.mysql]
+
+  provisioner "local-exec" {
+    command = <<EOT
+mysql -h ${azurerm_mysql_flexible_server.mysql.fqdn} \
+      -u ${var.mysql_admin_user} \
+      -p${var.mysql_admin_password} \
+      -e "CREATE DATABASE IF NOT EXISTS appdb;"
+EOT
+  }
 }
