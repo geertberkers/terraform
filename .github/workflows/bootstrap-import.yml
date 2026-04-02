@@ -45,13 +45,18 @@ jobs:
 
 
       # =========================
-      # IMPORT COSMOS DB
+      # IMPORT DATABASES
       # =========================
-      - name: Import Cosmos DB
+      - name: Import Databases
         run: |
           terraform import module.databases.azurerm_cosmosdb_account.cosmos \
             /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-databases-europe/providers/Microsoft.DocumentDB/databaseAccounts/cosmos-global
 
+          terraform import module.databases.azurerm_mysql_flexible_server.mysql \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-databases-europe/providers/Microsoft.DBforMySQL/flexibleServers/mysql-global
+
+          terraform import module.databases.azurerm_postgresql_flexible_server.postgres \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-databases-europe/providers/Microsoft.DBforPostgreSQL/flexibleServers/pg-global
 
       # =========================
       # IMPORT RESOURCE GROUPS
