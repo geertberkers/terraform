@@ -46,102 +46,102 @@ jobs:
       - name: Terraform Init
         run: terraform init -input=false -lock-timeout=10m
 
-      # =========================
-      # 🔥 IMPORT EXISTING RESOURCES (SAFE, IDEMPOTENT)
-      # =========================
-      - name: Terraform Import existing Azure resources
-        run: |
-          terraform init -input=false -lock-timeout=10m
+      # # =========================
+      # # 🔥 IMPORT EXISTING RESOURCES (SAFE, IDEMPOTENT)
+      # # =========================
+      # - name: Terraform Import existing Azure resources
+      #   run: |
+      #     terraform init -input=false -lock-timeout=10m
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.switzerland.azurerm_resource_group.rg \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.switzerland.azurerm_resource_group.rg \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north || true
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.sweden.azurerm_resource_group.rg \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.sweden.azurerm_resource_group.rg \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central || true
             
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.switzerland.azurerm_subnet.subnet \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/virtualNetworks/vnet-ch/subnets/subnet-ch || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.switzerland.azurerm_subnet.subnet \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/virtualNetworks/vnet-ch/subnets/subnet-ch || true
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.sweden.azurerm_subnet.subnet \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/virtualNetworks/vnet-se/subnets/subnet-se || true 
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.sweden.azurerm_subnet.subnet \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/virtualNetworks/vnet-se/subnets/subnet-se || true 
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.switzerland.azurerm_network_interface.nic[0] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/networkInterfaces/nic-ch-0 || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.switzerland.azurerm_network_interface.nic[0] \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/networkInterfaces/nic-ch-0 || true
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.switzerland.azurerm_network_interface.nic[1] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/networkInterfaces/nic-ch-1 || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.switzerland.azurerm_network_interface.nic[1] \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/networkInterfaces/nic-ch-1 || true
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.sweden.azurerm_network_interface.nic[0] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/networkInterfaces/nic-se-0 || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.sweden.azurerm_network_interface.nic[0] \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/networkInterfaces/nic-se-0 || true
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.sweden.azurerm_network_interface.nic[1] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/networkInterfaces/nic-se-1 || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.sweden.azurerm_network_interface.nic[1] \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/networkInterfaces/nic-se-1 || true
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.switzerland.azurerm_virtual_network.vnet \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/virtualNetworks/vnet-ch || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.switzerland.azurerm_virtual_network.vnet \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/virtualNetworks/vnet-ch || true
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.sweden.azurerm_virtual_network.vnet \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/virtualNetworks/vnet-se || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.sweden.azurerm_virtual_network.vnet \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/virtualNetworks/vnet-se || true
             
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.switzerland.azurerm_public_ip.ip[0] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/publicIPAddresses/ip-ch-0 || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.switzerland.azurerm_public_ip.ip[0] \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/publicIPAddresses/ip-ch-0 || true
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.switzerland.azurerm_public_ip.ip[1] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/publicIPAddresses/ip-ch-1 || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.switzerland.azurerm_public_ip.ip[1] \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/publicIPAddresses/ip-ch-1 || true
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.sweden.azurerm_public_ip.ip[0] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/publicIPAddresses/ip-se-0 || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.sweden.azurerm_public_ip.ip[0] \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/publicIPAddresses/ip-se-0 || true
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.sweden.azurerm_public_ip.ip[1] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/publicIPAddresses/ip-se-1 || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.sweden.azurerm_public_ip.ip[1] \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/publicIPAddresses/ip-se-1 || true
             
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.switzerland.azurerm_linux_virtual_machine.vm[0] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Compute/virtualMachines/vm-ch-0 || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.switzerland.azurerm_linux_virtual_machine.vm[0] \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Compute/virtualMachines/vm-ch-0 || true
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.switzerland.azurerm_linux_virtual_machine.vm[1] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Compute/virtualMachines/vm-ch-1 || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.switzerland.azurerm_linux_virtual_machine.vm[1] \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Compute/virtualMachines/vm-ch-1 || true
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.sweden.azurerm_linux_virtual_machine.vm[0] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Compute/virtualMachines/vm-se-0 || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.sweden.azurerm_linux_virtual_machine.vm[0] \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Compute/virtualMachines/vm-se-0 || true
 
-          terraform import \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            module.sweden.azurerm_linux_virtual_machine.vm[1] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Compute/virtualMachines/vm-se-1 || true
+      #     terraform import \
+      #       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+      #       module.sweden.azurerm_linux_virtual_machine.vm[1] \
+      #       /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Compute/virtualMachines/vm-se-1 || true
 
       # =========================
       # Format check
