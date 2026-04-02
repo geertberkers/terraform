@@ -1,0 +1,27 @@
+geert@hp-thinclient:~/multi-cloud-free-tier/terraform$ nano github_secrets.sh
+geert@hp-thinclient:~/multi-cloud-free-tier/terraform$ chmod +x github_secrets.sh
+geert@hp-thinclient:~/multi-cloud-free-tier/terraform$ ./github_secrets.sh
+=== Azure GitHub Actions Setup ===
+
+Subscription : Azure subscription 1
+Subscription ID : 677e2d5a-d22d-4537-8077-3a8357035660
+Tenant ID       : 84ff1294-6109-46e3-844c-6784b340b740
+
+Creating service principal 'github-terraform'...
+WARNING: Creating 'Contributor' role assignment under scope '/subscriptions/677e2d5a-d22d-4537-8077-3a8357035660'
+WARNING: The output includes credentials that you must protect. Be sure that you do not include these credentials in your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli
+
+================================================
+  Add these as GitHub Actions secrets:
+================================================
+
+  ARM_SUBSCRIPTION_ID  =  677e2d5a-d22d-4537-8077-3a8357035660
+  ARM_TENANT_ID        =  84ff1294-6109-46e3-844c-6784b340b740
+  ARM_CLIENT_ID        =  da88d6be-f5f7-4e0a-8cf6-9a4239e5d133
+  ARM_CLIENT_SECRET    =  ...
+
+================================================
+  CLIENT_SECRET is only shown once!
+  Copy it now before closing this terminal.
+================================================
+geert@hp-thinclient:~/multi-cloud-free-tier/terraform$
