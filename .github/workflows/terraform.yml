@@ -33,8 +33,16 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
+      # ✅ Azure login (needed for azurerm backend access)
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -input=false
 
       - name: Terraform Format Check
         run: terraform fmt -check -recursive
@@ -61,6 +69,7 @@ jobs:
             const truncated = output.length > 60000
               ? output.substring(0, 60000) + '\n\n... (truncated)'
               : output;
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -90,8 +99,16 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
+      # ✅ Azure login required for remote state + apply
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -input=false
 
       - name: Terraform Apply
         run: |
