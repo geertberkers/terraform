@@ -122,6 +122,26 @@ jobs:
             -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
             module.sweden.azurerm_public_ip.ip[1] \
             /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/publicIPAddresses/ip-se-1 || true
+            
+          terraform import \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+            module.switzerland.azurerm_linux_virtual_machine.vm[0] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Compute/virtualMachines/vm-ch-0 || true
+
+          terraform import \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+            module.switzerland.azurerm_linux_virtual_machine.vm[1] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Compute/virtualMachines/vm-ch-1 || true
+
+          terraform import \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+            module.sweden.azurerm_linux_virtual_machine.vm[0] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Compute/virtualMachines/vm-se-0 || true
+
+          terraform import \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+            module.sweden.azurerm_linux_virtual_machine.vm[1] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Compute/virtualMachines/vm-se-1 || true
 
       # =========================
       # Format check
