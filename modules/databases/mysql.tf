@@ -18,4 +18,8 @@ resource "azurerm_mysql_flexible_server" "mysql" {
   # required in newer provider versions
   # Optional but recommended: zone can cause issues in some regions
   # zone = "1"
+  
+  lifecycle {
+    ignore_changes = [zone]
+  }
 }
