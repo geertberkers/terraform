@@ -63,6 +63,14 @@ jobs:
             module.sweden.azurerm_resource_group.rg \
             /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central || true
             
+          terraform import module.switzerland.azurerm_subnet.subnet \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/virtualNetworks/vnet-ch/subnets/subnet-ch || true
+
+          terraform import module.sweden.azurerm_subnet.subnet \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/virtualNetworks/vnet-se/subnets/subnet-se || true
+      
           terraform import \
             -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
             module.switzerland.azurerm_virtual_network.vnet \
