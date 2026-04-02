@@ -6,3 +6,13 @@ crash.log
 *.tfvars.json
 .terraform.lock.hcl
 logs/secret.log
+
+
+bootstrap/.terraform/
+bootstrap/*.tfstate
+bootstrap/*.tfstate.*
+bootstrap/crash.log
+bootstrap/*.tfvars
+bootstrap/*.tfvars.json
+bootstrap/.terraform.lock.hcl
+bootstrap/logs/secret.log
