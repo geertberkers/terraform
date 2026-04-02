@@ -1,128 +1,75 @@
-name: Terraform Azure Deployment
+name: Terraform Azure OIDC Deploy
 
 on:
   push:
     branches:
       - main
-    paths:
-      - '**.tf'
-      - '.github/workflows/terraform.yml'
 
   pull_request:
-    paths:
-      - '**.tf'
-      - '.github/workflows/terraform.yml'
 
 env:
   TF_VERSION: "1.7.5"
+
+  # 🔐 Azure OIDC auth (IMPORTANT)
   ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  ARM_USE_OIDC: "true"
 
 jobs:
-  validate:
-    name: Validate & Plan
+  terraform:
+    name: Terraform Plan & Apply
     runs-on: ubuntu-latest
 
     permissions:
-      id-token: write
+      id-token: write   # 🔥 REQUIRED for OIDC
       contents: read
 
     steps:
+      # =========================
+      # Checkout repo
+      # =========================
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # =========================
+      # Setup Terraform
+      # =========================
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Azure Login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.ARM_CLIENT_ID }}
-          tenant-id: ${{ secrets.ARM_TENANT_ID }}
-          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-
+      # =========================
+      # Terraform Init (Azure backend + OIDC)
+      # =========================
       - name: Terraform Init
         run: terraform init -input=false
 
-      - name: Terraform Format Check
+      # =========================
+      # Format check
+      # =========================
+      - name: Terraform Format
         run: terraform fmt -check -recursive
 
+      # =========================
+      # Validate
+      # =========================
       - name: Terraform Validate
         run: terraform validate
 
+      # =========================
+      # Plan
+      # =========================
       - name: Terraform Plan
-        id: plan
         run: |
           terraform plan \
             -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            -out=tfplan \
-            -no-color 2>&1 | tee plan_output.txt
-        continue-on-error: true
+            -out=tfplan
 
-      - name: Comment PR with Plan
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const output = fs.readFileSync('plan_output.txt', 'utf8');
-
-            const truncated = output.length > 60000
-              ? output.substring(0, 60000) + '\n\n... (truncated)'
-              : output;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `## Terraform Plan\n\`\`\`\n${truncated}\n\`\`\``
-            });
-
-      - name: Fail if Plan Failed
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
-  deploy:
-    name: Apply (main only)
-    runs-on: ubuntu-latest
-    needs: validate
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
-    environment:
-      name: production
-
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-
-      - name: Azure Login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.ARM_CLIENT_ID }}
-          tenant-id: ${{ secrets.ARM_TENANT_ID }}
-          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-
-      - name: Terraform Init
-        run: terraform init -input=false
-
+      # =========================
+      # Apply ONLY on main branch push
+      # =========================
       - name: Terraform Apply
-        run: |
-          terraform apply \
-            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            -auto-approve \
-            -no-color
-
-      - name: Show Outputs
-        run: terraform output
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve tfplan
