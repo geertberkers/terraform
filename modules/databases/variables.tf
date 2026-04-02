@@ -25,3 +25,4 @@ variable "sql_admin_user" {
 variable "sql_admin_password" {
   type = string
 }
+
