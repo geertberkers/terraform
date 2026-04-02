@@ -109,6 +109,48 @@ chmod +x synch.sh
 
 ---
 
+## CI/CD — GitHub Actions
+
+The workflow at `.github/workflows/terraform.yml` runs automatically when `.tf` files are changed.
+
+### Branch strategy
+
+| Event | What happens |
+|---|---|
+| Push to `main` | Validate → Plan → **Apply** (real deployment) |
+| Pull Request | Validate → Plan only (no deploy, plan posted as PR comment) |
+
+This means you can open a PR to preview exactly what Terraform will change before it touches real infrastructure. Only merging to `main` triggers an actual deployment.
+
+### Required GitHub Secrets
+
+Go to **Settings → Secrets and variables → Actions** in your repo and add:
+
+| Secret | How to get it |
+|---|---|
+| `ARM_CLIENT_ID` | Azure Service Principal App ID |
+| `ARM_CLIENT_SECRET` | Azure Service Principal password |
+| `ARM_SUBSCRIPTION_ID` | Your Azure Subscription ID |
+| `ARM_TENANT_ID` | Your Azure Active Directory Tenant ID |
+| `SSH_PUBLIC_KEY` | Contents of your `id_rsa.pub` (or equivalent) |
+
+To create a Service Principal with the right permissions:
+
+```bash
+az ad sp create-for-rbac \
+  --name "github-terraform" \
+  --role Contributor \
+  --scopes /subscriptions/<your-subscription-id>
+```
+
+This outputs the `appId` (CLIENT_ID), `password` (CLIENT_SECRET), and `tenant` (TENANT_ID) you need.
+
+### Production environment gate (optional but recommended)
+
+The `deploy` job targets a GitHub Environment called `production`. In **Settings → Environments → production** you can add required reviewers, so every deploy to `main` needs a manual approval before Terraform applies. Useful for catching anything the plan might have missed.
+
+---
+
 ## SSH Access
 
 ```bash
