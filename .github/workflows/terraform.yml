@@ -44,14 +44,14 @@ jobs:
       # Terraform Init
       # =========================
       - name: Terraform Init
-        run: terraform init -input=false
+        run: terraform init -input=false -lock-timeout=10m
 
       # =========================
       # 🔥 IMPORT EXISTING RESOURCES (SAFE, IDEMPOTENT)
       # =========================
       - name: Terraform Import existing Azure resources
         run: |
-          terraform init -input=false
+          terraform init -input=false -lock-timeout=10m
 
           terraform import \
             -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
@@ -62,6 +62,7 @@ jobs:
             -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
             module.sweden.azurerm_resource_group.rg \
             /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central || true
+
       # =========================
       # Format check
       # =========================
@@ -80,6 +81,7 @@ jobs:
       - name: Terraform Plan
         run: |
           terraform plan \
+            -lock-timeout=10m \
             -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
             -out=tfplan
 
@@ -88,4 +90,7 @@ jobs:
       # =========================
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve tfplan
+        run: |
+          terraform apply \
+            -lock-timeout=10m \
+            -auto-approve tfplan
