@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
   }
 
   # Backend stays in backend.tf
@@ -78,11 +82,8 @@ module "databases" {
   env                 = "global"
 
   mysql_admin_user     = var.mysql_admin_user
-  mysql_admin_password = var.mysql_admin_password
 
   sql_admin_user     = var.sql_admin_user
-  sql_admin_password = var.sql_admin_password
 
   pg_admin_user     = var.pg_admin_user
-  pg_admin_password = var.pg_admin_password
 }

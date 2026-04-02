@@ -4,7 +4,7 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
   location            = azurerm_resource_group.db_rg.location
 
   administrator_login    = var.pg_admin_user
-  administrator_password = var.pg_admin_password
+  administrator_password = random_password.pg_admin.result
 
   sku_name = "B_Standard_B1ms"
 

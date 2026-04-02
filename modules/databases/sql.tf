@@ -10,7 +10,7 @@ resource "azurerm_mssql_server" "sql" {
   location            = azurerm_resource_group.db_rg.location
 
   administrator_login          = var.sql_admin_user
-  administrator_login_password = var.sql_admin_password
+  administrator_login_password = random_password.sql_admin.result
 
   version = "12.0"
 
