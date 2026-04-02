@@ -1,5 +1,11 @@
+resource "random_string" "sql_suffix" {
+  length  = 5
+  special = false
+  upper   = false
+}
+
 resource "azurerm_mssql_server" "sql" {
-  name                = "sql-${var.env}"
+  name = "sql-${var.env}-${random_string.sql_suffix.result}"
   resource_group_name = azurerm_resource_group.db_rg.name
   location            = azurerm_resource_group.db_rg.location
 
