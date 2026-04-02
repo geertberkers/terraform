@@ -62,6 +62,36 @@ jobs:
             -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
             module.sweden.azurerm_resource_group.rg \
             /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central || true
+            
+          terraform import \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+            module.switzerland.azurerm_virtual_network.vnet \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/virtualNetworks/vnet-ch || true
+
+          terraform import \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+            module.sweden.azurerm_virtual_network.vnet \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/virtualNetworks/vnet-se || true
+            
+          terraform import \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+            module.switzerland.azurerm_public_ip.ip[0] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/publicIPAddresses/ip-ch-0 || true
+
+          terraform import \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+            module.switzerland.azurerm_public_ip.ip[1] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/publicIPAddresses/ip-ch-1 || true
+
+          terraform import \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+            module.sweden.azurerm_public_ip.ip[0] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/publicIPAddresses/ip-se-0 || true
+
+          terraform import \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+            module.sweden.azurerm_public_ip.ip[1] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/publicIPAddresses/ip-se-1 || true
 
       # =========================
       # Format check
