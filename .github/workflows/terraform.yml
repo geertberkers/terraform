@@ -51,14 +51,17 @@ jobs:
       # =========================
       - name: Terraform Import existing Azure resources
         run: |
-          # Switzerland RG import
-          terraform import module.switzerland.azurerm_resource_group.rg \
+          terraform init -input=false
+
+          terraform import \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+            module.switzerland.azurerm_resource_group.rg \
             /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north || true
 
-          # Sweden RG import
-          terraform import module.sweden.azurerm_resource_group.rg \
+          terraform import \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+            module.sweden.azurerm_resource_group.rg \
             /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central || true
-
       # =========================
       # Format check
       # =========================
