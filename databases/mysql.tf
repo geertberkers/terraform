@@ -4,7 +4,7 @@ resource "azurerm_mysql_flexible_server" "mysql" {
   location            = var.location
 
   administrator_login    = var.mysql_admin_user
-  administrator_password  = var.mysql_admin_password
+  administrator_password = var.mysql_admin_password
 
   sku_name = "B_Standard_B1ms"
   version  = "8.0"
