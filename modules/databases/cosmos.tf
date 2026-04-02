@@ -46,5 +46,5 @@ resource "azurerm_cosmosdb_sql_container" "container" {
 
   partition_key_paths = ["/id"]
 
-  partition_key_kind  = "Hash"
+  partition_key_kind = "Hash"
 }
