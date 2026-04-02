@@ -134,16 +134,36 @@ Go to **Settings → Secrets and variables → Actions** in your repo and add:
 | `ARM_TENANT_ID` | Your Azure Active Directory Tenant ID |
 | `SSH_PUBLIC_KEY` | Contents of your `id_rsa.pub` (or equivalent) |
 
-To create a Service Principal with the right permissions:
+### `setup_github_secrets.sh` — automated setup
+
+Run this script to create the Service Principal and push all secrets to GitHub in one go:
 
 ```bash
-az ad sp create-for-rbac \
-  --name "github-terraform" \
-  --role Contributor \
-  --scopes /subscriptions/<your-subscription-id>
+chmod +x setup_github_secrets.sh
+
+# Auto-detects repo if run from inside the repo folder:
+./setup_github_secrets.sh
+
+# Or pass the repo explicitly:
+./setup_github_secrets.sh myorg/my-repo
 ```
 
-This outputs the `appId` (CLIENT_ID), `password` (CLIENT_SECRET), and `tenant` (TENANT_ID) you need.
+Requires the **Azure CLI** (`az`) and **GitHub CLI** (`gh`) to be installed. The script will prompt you to log in to either if needed.
+
+**If the service principal already exists**, the script detects it and gives you two options:
+
+| Choice | What happens |
+|---|---|
+| Reset credentials | Generates a new secret for the existing SP and pushes it to GitHub |
+| Abort | Exits without changes — use this if you already have the secret stored elsewhere |
+
+> Resetting credentials invalidates the old secret immediately. If the old secret is used anywhere else (e.g. another repo or pipeline), update it there too.
+
+**Adding the SSH key** is a separate step printed at the end of the script:
+
+```bash
+gh secret set SSH_PUBLIC_KEY --body "$(cat ~/.ssh/id_rsa.pub)" --repo myorg/my-repo
+```
 
 ### Production environment gate (optional but recommended)
 
