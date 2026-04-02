@@ -1,12 +1,27 @@
-variable "resource_group_name" {}
-variable "location" {}
-variable "env" {}
+variable "resource_group_name" {
+  type = string
+}
 
-variable "pg_admin_user" {}
-variable "pg_admin_password" {}
+variable "location" {
+  type = string
+}
 
-variable "mysql_admin_user" {}
-variable "mysql_admin_password" {}
+variable "env" {
+  type = string
+}
 
-variable "sql_admin_user" {}
-variable "sql_admin_password" {}
+variable "mysql_admin_user" {
+  type = string
+}
+
+variable "mysql_admin_password" {
+  type = string
+}
+
+variable "sql_admin_user" {
+  type = string
+}
+
+variable "sql_admin_password" {
+  type = string
+}

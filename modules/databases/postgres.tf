@@ -1,7 +1,7 @@
 resource "azurerm_postgresql_flexible_server" "postgres" {
   name                = "pg-flex-${var.env}"
-  resource_group_name = var.resource_group_name
-  location            = var.location
+  resource_group_name         = azurerm_resource_group.db_rg.name
+  location                    = azurerm_resource_group.db_rg.location
 
   administrator_login    = var.pg_admin_user
   administrator_password = var.pg_admin_password

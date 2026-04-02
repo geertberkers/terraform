@@ -66,3 +66,20 @@ module "sweden" {
 
   ssh_public_key = var.ssh_public_key
 }
+
+# =========================
+# DATABASES
+# =========================
+module "databases" {
+  source = "./modules/databases"
+
+  resource_group_name = "rg-databases-europe"
+  location            = "westeurope"
+  env                 = "global"
+
+  mysql_admin_user     = var.mysql_admin_user
+  mysql_admin_password  = var.mysql_admin_password
+
+  sql_admin_user       = var.sql_admin_user
+  sql_admin_password   = var.sql_admin_password
+}

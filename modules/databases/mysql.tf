@@ -1,7 +1,7 @@
 resource "azurerm_mysql_flexible_server" "mysql" {
   name                = "mysql-${var.env}"
-  resource_group_name = var.resource_group_name
-  location            = var.location
+   resource_group_name         = azurerm_resource_group.db_rg.name
+  location                    = azurerm_resource_group.db_rg.location
 
   administrator_login    = var.mysql_admin_user
   administrator_password = var.mysql_admin_password
