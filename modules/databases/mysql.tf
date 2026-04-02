@@ -9,10 +9,14 @@ resource "azurerm_mysql_flexible_server" "mysql" {
   sku_name = "B_Standard_B1ms"
   version  = "8.0"
 
-  storage_mb            = 32768
+  storage {
+    size_gb = 32
+  }
+
   backup_retention_days = 7
 
   # required in newer provider versions
+  # Optional but recommended: zone can cause issues in some regions
   zone = "1"
 }
 
