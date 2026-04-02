@@ -4,7 +4,7 @@ resource "azurerm_mssql_server" "sql" {
   location                     = var.location
 
   administrator_login          = var.sql_admin_user
-  administrator_login_password = var.sql_admin_password
+  administrator_login_password  = var.sql_admin_password
 
   version = "12.0"
 }

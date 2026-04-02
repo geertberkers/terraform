@@ -1,15 +1,15 @@
 resource "azurerm_mysql_flexible_server" "mysql" {
-  name                   = "mysql-${var.env}"
-  resource_group_name    = var.resource_group_name
-  location               = var.location
+  name                = "mysql-${var.env}"
+  resource_group_name = var.resource_group_name
+  location            = var.location
 
   administrator_login    = var.mysql_admin_user
-  administrator_password = var.mysql_admin_password
+  administrator_password  = var.mysql_admin_password
 
   sku_name = "B_Standard_B1ms"
   version  = "8.0"
 
-  storage_mb = 32768
+  storage_mb            = 32768
   backup_retention_days = 7
 }
 

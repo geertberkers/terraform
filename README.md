@@ -1,83 +1,181 @@
-# Azure VM Deployment — Terraform Module
+# Azure Infrastructure — Terraform Module (VMs + Databases)
 
-Deploys **2 Linux virtual machines** in an Azure region, each with its own Network Interface Card (NIC) and static public IP. Designed to be reused as a module per region (e.g. Sweden Central, Switzerland North).
+This repository contains a reusable Terraform setup for deploying:
+
+- 2 Linux Virtual Machines (per region)
+- Azure networking (VNet, Subnet, NICs, Public IPs)
+- Managed Azure databases (PostgreSQL, MySQL, Azure SQL, Cosmos DB)
+- CI/CD pipeline using GitHub Actions
+
+It is designed to be modular and reusable across multiple Azure regions (e.g. Sweden Central, Switzerland North).
 
 ---
 
-## Infrastructure Overview
+# 🧱 Infrastructure Overview
 
 ```
 Resource Group
 └── Virtual Network (10.0.0.0/16)
     └── Subnet (10.0.1.0/24)
-        ├── Public IP [0]  ──►  NIC [0]  ──►  VM [0]
-        └── Public IP [1]  ──►  NIC [1]  ──►  VM [1]
+        ├── Public IP [0]  ──► NIC [0] ──► VM [0]
+        ├── Public IP [1]  ──► NIC [1] ──► VM [1]
+        └── Databases (optional module)
+            ├── PostgreSQL Flexible Server
+            ├── MySQL Flexible Server
+            ├── Azure SQL Database
+            └── Cosmos DB
 ```
-
-Each VM runs **Ubuntu Server 22.04 LTS** and is accessible via SSH using a provided public key.
 
 ---
 
-## Resources Created
+# 🖥️ Virtual Machines
+
+Each VM runs:
+
+- Ubuntu Server 22.04 LTS
+- SSH authentication via public key
+- Static public IP
+- Dedicated NIC per VM
+
+---
+
+# 📦 Resources Created
 
 | Resource | Count | Notes |
 |---|---|---|
-| `azurerm_resource_group` | 1 | Per region |
-| `azurerm_virtual_network` | 1 | CIDR `10.0.0.0/16` |
-| `azurerm_subnet` | 1 | CIDR `10.0.1.0/24` |
-| `azurerm_public_ip` | 2 | Static, Standard SKU |
-| `azurerm_network_interface` | 2 | One per VM, dynamic private IP |
-| `azurerm_linux_virtual_machine` | 2 | Ubuntu 22.04 LTS, SSH auth |
-
-> **Note:** Public IPs have `prevent_destroy = true` to protect against accidental deletion.
-
----
-
-## Variables
-
-| Name | Required | Default | Description |
-|---|---|---|---|
-| `resource_group_name` | ✅ | — | Name of the Azure resource group |
-| `location` | ✅ | — | Azure region (e.g. `swedencentral`) |
-| `prefix` | ✅ | — | Short name prefix for all resources (e.g. `se`, `ch`) |
-| `vm_sizes` | ✅ | — | List of 2 VM sizes, one per VM |
-| `ssh_public_key` | ✅ | — | SSH public key for `azureuser` login |
-| `vnet_cidr` | ❌ | `10.0.0.0/16` | Address space for the virtual network |
-| `subnet_cidr` | ❌ | `10.0.1.0/24` | Address prefix for the subnet |
+| azurerm_resource_group | 1 | Per region |
+| azurerm_virtual_network | 1 | 10.0.0.0/16 |
+| azurerm_subnet | 1 | 10.0.1.0/24 |
+| azurerm_public_ip | 2 | Static |
+| azurerm_network_interface | 2 | One per VM |
+| azurerm_linux_virtual_machine | 2 | Ubuntu 22.04 |
+| azurerm_postgresql_flexible_server | optional | PostgreSQL DB |
+| azurerm_mysql_flexible_server | optional | MySQL DB |
+| azurerm_mssql_server | optional | Azure SQL |
+| azurerm_cosmosdb_account | optional | Cosmos DB |
 
 ---
 
-## Outputs
+# 🗄️ Database Module
 
-| Name | Description |
+The `databases/` module provisions managed Azure databases.
+
+## Supported Databases
+
+### PostgreSQL Flexible Server
+- PostgreSQL 14+
+- Automated backups
+- Optional public access
+
+### MySQL Flexible Server
+- MySQL 8.0
+- UTF8MB4 encoding
+- Managed backups
+
+### Azure SQL Database
+- Fully managed SQL Server
+- Basic tier included
+- Auto patching & backups
+
+### Cosmos DB
+- Global NoSQL database
+- Serverless option
+- High scalability
+
+---
+
+## 📁 Database Structure
+
+```
+terraform/
+└── databases/
+    ├── main.tf
+    ├── postgres.tf
+    ├── mysql.tf
+    ├── sql.tf
+    ├── cosmos.tf
+    ├── variables.tf
+    └── outputs.tf
+```
+
+---
+
+# ⚙️ Variables
+
+## Core
+
+| Name | Required | Description |
+|---|---|---|
+| resource_group_name | yes | Azure RG |
+| location | yes | Azure region |
+| prefix | yes | Resource prefix |
+| vm_sizes | yes | VM sizes |
+| ssh_public_key | yes | SSH key |
+
+## Database
+
+| Name | Required |
 |---|---|
-| `public_ips` | List of the two static public IP addresses |
+| pg_admin_user | no |
+| pg_admin_password | no |
+| mysql_admin_user | no |
+| mysql_admin_password | no |
+| sql_admin_user | no |
+| sql_admin_password | no |
 
 ---
 
-## Usage
+# 📤 Outputs
+
+- public_ips
+- postgres_fqdn
+- mysql_fqdn
+- sql_server_name
+- cosmos_endpoint
+
+---
+
+# 🚀 Usage Example
+
+## VM Module
 
 ```hcl
 module "sweden" {
   source              = "./modules/vm-pair"
-  resource_group_name = "rg-sweden-central"
+  resource_group_name = "rg-sweden"
   location            = "swedencentral"
   prefix              = "se"
   vm_sizes            = ["Standard_B2s", "Standard_B2s"]
   ssh_public_key      = var.ssh_public_key
 }
+```
 
-module "switzerland" {
-  source              = "./modules/vm-pair"
-  resource_group_name = "rg-switzerland-north"
-  location            = "switzerlandnorth"
-  prefix              = "ch"
-  vm_sizes            = ["Standard_B2s", "Standard_B2s"]
-  ssh_public_key      = var.ssh_public_key
+---
+
+## Database Module
+
+```hcl
+module "databases" {
+  source = "./databases"
+
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  env                 = "dev"
+
+  pg_admin_user       = var.pg_admin_user
+  pg_admin_password   = var.pg_admin_password
+
+  mysql_admin_user    = var.mysql_admin_user
+  mysql_admin_password = var.mysql_admin_password
+
+  sql_admin_user      = var.sql_admin_user
+  sql_admin_password  = var.sql_admin_password
 }
 ```
 
-Then apply:
+---
+
+# 🔄 Terraform Commands
 
 ```bash
 terraform init
@@ -87,98 +185,87 @@ terraform apply tfplan
 
 ---
 
-## `synch.sh` — Import Existing NICs into Terraform State
+# 🌿 Branch Strategy
 
-If the NICs already exist in Azure (e.g. created manually or outside of Terraform), `synch.sh` imports them into the Terraform state so Terraform can manage them going forward.
+| Event | Action |
+|---|---|
+| Push to main | Plan + Apply (production) |
+| Pull Request | Plan only |
 
-It targets both the Sweden Central and Switzerland North deployments:
+PRs are safe previews. Only merging to main deploys infrastructure.
 
+---
+
+# 🔐 GitHub Secrets
+
+Configure in GitHub → Settings → Secrets:
+
+| Secret | Description |
+|---|---|
+| ARM_CLIENT_ID | Azure Service Principal |
+| ARM_CLIENT_SECRET | Azure secret |
+| ARM_SUBSCRIPTION_ID | Azure subscription |
+| ARM_TENANT_ID | Azure tenant |
+| SSH_PUBLIC_KEY | SSH key |
+
+---
+
+# ⚙️ setup_github_secrets.sh
+
+Automates Azure + GitHub setup.
+
+```bash
+chmod +x setup_github_secrets.sh
+./setup_github_secrets.sh
 ```
-Sweden Central:    nic-se-0, nic-se-1
-Switzerland North: nic-ch-0, nic-ch-1
+
+Features:
+- Creates Azure Service Principal
+- Pushes GitHub secrets
+- Handles existing credentials safely
+
+---
+
+# 🔐 SSH Access
+
+```bash
+ssh azureuser@<public_ip>
 ```
 
-Run it once to sync remote state before applying changes:
+```bash
+terraform output public_ips
+```
+
+---
+
+# 🧪 sync script
+
+If resources already exist:
 
 ```bash
 chmod +x synch.sh
 ./synch.sh
 ```
 
-> **When to use this:** Run `synch.sh` when resources were created outside of Terraform and you need to bring them under Terraform management without recreating them. You do **not** need to run it on a fresh deployment.
+Used to import existing Azure NICs into Terraform state.
 
 ---
 
-## CI/CD — GitHub Actions
+# 📈 CI/CD Pipeline
 
-The workflow at `.github/workflows/terraform.yml` runs automatically when `.tf` files are changed.
+GitHub Actions automatically:
 
-### Branch strategy
-
-| Event | What happens |
-|---|---|
-| Push to `main` | Validate → Plan → **Apply** (real deployment) |
-| Pull Request | Validate → Plan only (no deploy, plan posted as PR comment) |
-
-This means you can open a PR to preview exactly what Terraform will change before it touches real infrastructure. Only merging to `main` triggers an actual deployment.
-
-### Required GitHub Secrets
-
-Go to **Settings → Secrets and variables → Actions** in your repo and add:
-
-| Secret | How to get it |
-|---|---|
-| `ARM_CLIENT_ID` | Azure Service Principal App ID |
-| `ARM_CLIENT_SECRET` | Azure Service Principal password |
-| `ARM_SUBSCRIPTION_ID` | Your Azure Subscription ID |
-| `ARM_TENANT_ID` | Your Azure Active Directory Tenant ID |
-| `SSH_PUBLIC_KEY` | Contents of your `id_rsa.pub` (or equivalent) |
-
-### `setup_github_secrets.sh` — automated setup
-
-Run this script to create the Service Principal and push all secrets to GitHub in one go:
-
-```bash
-chmod +x setup_github_secrets.sh
-
-# Auto-detects repo if run from inside the repo folder:
-./setup_github_secrets.sh
-
-# Or pass the repo explicitly:
-./setup_github_secrets.sh myorg/my-repo
-```
-
-Requires the **Azure CLI** (`az`) and **GitHub CLI** (`gh`) to be installed. The script will prompt you to log in to either if needed.
-
-**If the service principal already exists**, the script detects it and gives you two options:
-
-| Choice | What happens |
-|---|---|
-| Reset credentials | Generates a new secret for the existing SP and pushes it to GitHub |
-| Abort | Exits without changes — use this if you already have the secret stored elsewhere |
-
-> Resetting credentials invalidates the old secret immediately. If the old secret is used anywhere else (e.g. another repo or pipeline), update it there too.
-
-**Adding the SSH key** is a separate step printed at the end of the script:
-
-```bash
-gh secret set SSH_PUBLIC_KEY --body "$(cat ~/.ssh/id_rsa.pub)" --repo myorg/my-repo
-```
-
-### Production environment gate (optional but recommended)
-
-The `deploy` job targets a GitHub Environment called `production`. In **Settings → Environments → production** you can add required reviewers, so every deploy to `main` needs a manual approval before Terraform applies. Useful for catching anything the plan might have missed.
+- Validates Terraform
+- Plans changes
+- Applies on main branch
+- Comments PR plans
 
 ---
 
-## SSH Access
+# 🚀 Recommended Upgrades
 
-```bash
-ssh azureuser@<public_ip>
-```
-
-Public IPs are printed after `terraform apply` via the `public_ips` output, or retrieved anytime with:
-
-```bash
-terraform output public_ips
-```
+- Private endpoints for databases
+- Azure Key Vault integration
+- VM scale sets + load balancer
+- Monitoring (Azure Monitor + Logs)
+- Cost optimization (free-tier setup)
