@@ -1,0 +1,134 @@
+name: Terraform Bootstrap Import (ONE TIME ONLY)
+
+on:
+  workflow_dispatch:
+
+env:
+  TF_VERSION: "1.7.5"
+
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  ARM_USE_OIDC: "true"
+  TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+
+jobs:
+  import:
+    name: Import Existing Azure Resources into Terraform State
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+
+      # =========================
+      # Checkout
+      # =========================
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # =========================
+      # Setup Terraform
+      # =========================
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      # =========================
+      # Init backend
+      # =========================
+      - name: Terraform Init
+        run: terraform init -reconfigure -input=false -lock-timeout=10m
+
+      # =========================
+      # IMPORT RESOURCE GROUPS
+      # =========================
+      - name: Import Resource Groups
+        run: |
+          terraform import module.switzerland.azurerm_resource_group.rg \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north || true
+
+          terraform import module.sweden.azurerm_resource_group.rg \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central || true
+
+      # =========================
+      # IMPORT VNets
+      # =========================
+      - name: Import VNets
+        run: |
+          terraform import module.switzerland.azurerm_virtual_network.vnet \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/virtualNetworks/vnet-ch || true
+
+          terraform import module.sweden.azurerm_virtual_network.vnet \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/virtualNetworks/vnet-se || true
+
+      # =========================
+      # IMPORT SUBNETS
+      # =========================
+      - name: Import Subnets
+        run: |
+          terraform import module.switzerland.azurerm_subnet.subnet \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/virtualNetworks/vnet-ch/subnets/subnet-ch || true
+
+          terraform import module.sweden.azurerm_subnet.subnet \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/virtualNetworks/vnet-se/subnets/subnet-se || true
+
+      # =========================
+      # IMPORT NETWORK INTERFACES
+      # =========================
+      - name: Import NICs
+        run: |
+          terraform import module.switzerland.azurerm_network_interface.nic[0] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/networkInterfaces/nic-ch-0 || true
+
+          terraform import module.switzerland.azurerm_network_interface.nic[1] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/networkInterfaces/nic-ch-1 || true
+
+          terraform import module.sweden.azurerm_network_interface.nic[0] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/networkInterfaces/nic-se-0 || true
+
+          terraform import module.sweden.azurerm_network_interface.nic[1] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/networkInterfaces/nic-se-1 || true
+
+      # =========================
+      # IMPORT PUBLIC IPs
+      # =========================
+      - name: Import Public IPs
+        run: |
+          terraform import module.switzerland.azurerm_public_ip.ip[0] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/publicIPAddresses/ip-ch-0 || true
+
+          terraform import module.switzerland.azurerm_public_ip.ip[1] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/publicIPAddresses/ip-ch-1 || true
+
+          terraform import module.sweden.azurerm_public_ip.ip[0] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/publicIPAddresses/ip-se-0 || true
+
+          terraform import module.sweden.azurerm_public_ip.ip[1] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/publicIPAddresses/ip-se-1 || true
+
+      # =========================
+      # IMPORT VIRTUAL MACHINES
+      # =========================
+      - name: Import Virtual Machines
+        run: |
+          terraform import module.switzerland.azurerm_linux_virtual_machine.vm[0] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Compute/virtualMachines/vm-ch-0 || true
+
+          terraform import module.switzerland.azurerm_linux_virtual_machine.vm[1] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Compute/virtualMachines/vm-ch-1 || true
+
+          terraform import module.sweden.azurerm_linux_virtual_machine.vm[0] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Compute/virtualMachines/vm-se-0 || true
+
+          terraform import module.sweden.azurerm_linux_virtual_machine.vm[1] \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Compute/virtualMachines/vm-se-1 || true
+
+      # =========================
+      # FINAL CHECK
+      # =========================
+      - name: Verify State
+        run: terraform state list
