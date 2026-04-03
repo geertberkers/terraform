@@ -2,10 +2,10 @@
 # PostgreSQL Managed Identity Access
 # ==========================================
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "postgres_admin" {
-  server_id             = azurerm_postgresql_flexible_server.postgres.id
-  principal_name        = "app-identity"  # Reference your app identity name
-  principal_object_id   = var.app_identity_principal_id
-  principal_type        = "ServicePrincipal"
+  server_id           = azurerm_postgresql_flexible_server.postgres.id
+  principal_name      = "app-identity" # Reference your app identity name
+  principal_object_id = var.app_identity_principal_id
+  principal_type      = "ServicePrincipal"
 }
 
 # ==========================================
@@ -42,18 +42,18 @@ resource "null_resource" "sql_contained_user" {
 # CosmosDB Managed Identity Access
 # ==========================================
 resource "azurerm_role_assignment" "cosmos_access" {
-  scope              = azurerm_cosmosdb_account.cosmos.id
+  scope                = azurerm_cosmosdb_account.cosmos.id
   role_definition_name = "Cosmos DB Built-in Data Contributor"
-  principal_id       = var.app_identity_principal_id
+  principal_id         = var.app_identity_principal_id
 }
 
 # ==========================================
 # Key Vault Access for the Managed Identity
 # ==========================================
 resource "azurerm_key_vault_access_policy" "app_identity_kv" {
-  key_vault_id       = azurerm_key_vault.kv.id
-  tenant_id          = data.azurerm_client_config.current.tenant_id
-  object_id          = var.app_identity_principal_id
+  key_vault_id = azurerm_key_vault.kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = var.app_identity_principal_id
 
   secret_permissions = [
     "Get", "List"

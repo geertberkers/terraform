@@ -14,10 +14,10 @@ resource "azurerm_linux_web_app" "app" {
 
   site_config {
     always_on = true # Required for Java apps
-    
+
     application_stack {
-      java_version      = "17"
-      java_server       = "TOMCAT"
+      java_version        = "17"
+      java_server         = "TOMCAT"
       java_server_version = "10.1"
     }
 
@@ -25,9 +25,9 @@ resource "azurerm_linux_web_app" "app" {
   }
 
   app_settings = {
-    "WEBSITES_ENABLE_APP_SERVICE_STORAGE"    = "false"
-    "WEBSITE_USE_32BIT_WORKER_PROCESS"       = "false"
-    "PORT"                                   = "8080"
+    "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
+    "WEBSITE_USE_32BIT_WORKER_PROCESS"    = "false"
+    "PORT"                                = "8080"
   }
 
   identity {

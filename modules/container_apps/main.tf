@@ -27,7 +27,7 @@ resource "azurerm_container_app" "app" {
       memory = "0.5Gi"
     }
   }
-  
+
   ingress {
     allow_insecure_connections = false
     external_enabled           = true

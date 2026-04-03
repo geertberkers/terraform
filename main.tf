@@ -84,10 +84,10 @@ module "databases" {
   location            = "swedencentral"
   env                 = "global"
 
-  mysql_admin_user            = var.mysql_admin_user
-  sql_admin_user              = var.sql_admin_user
-  pg_admin_user               = var.pg_admin_user
-  app_identity_principal_id   = module.app_service.app_identity_principal_id
+  mysql_admin_user          = var.mysql_admin_user
+  sql_admin_user            = var.sql_admin_user
+  pg_admin_user             = var.pg_admin_user
+  app_identity_principal_id = module.app_service.app_identity_principal_id
 }
 
 # =========================
