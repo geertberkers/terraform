@@ -57,6 +57,7 @@ object DatabaseFactory {
         val postgresUser = System.getenv("POSTGRES_USER") ?: "postgres"
 
         val config = HikariConfig().apply {
+            driverClassName = "org.postgresql.Driver"
             jdbcUrl = "jdbc:postgresql://$postgresHost:$postgresPort/$postgresDb"
             username = postgresUser
             
@@ -88,6 +89,7 @@ object DatabaseFactory {
         val mysqlUser = System.getenv("MYSQL_USER") ?: "root"
 
         val config = HikariConfig().apply {
+            driverClassName = "com.mysql.cj.jdbc.Driver"
             jdbcUrl = "jdbc:mysql://$mysqlHost:$mysqlPort/$mysqlDb?useSSL=true&requireSSL=true"
             username = mysqlUser
             password = System.getenv("MYSQL_PASSWORD") ?: ""
@@ -108,6 +110,7 @@ object DatabaseFactory {
         val sqlPassword = System.getenv("SQLSERVER_PASSWORD") ?: ""
 
         val config = HikariConfig().apply {
+            driverClassName = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
             jdbcUrl = "jdbc:sqlserver://$sqlHost:$sqlPort;database=$sqlDb;encrypt=true;trustServerCertificate=false"
             username = sqlUser
             password = sqlPassword
