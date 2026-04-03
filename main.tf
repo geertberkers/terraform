@@ -87,3 +87,30 @@ module "databases" {
 
   pg_admin_user     = var.pg_admin_user
 }
+
+# =========================
+# APP HOSTING EXAMPLES
+# =========================
+# Below are examples of how to adopt the new web hosting architectures instead of VMs.
+# Uncomment the one you want to use for your application footprint!
+
+# module "my_app_service" {
+#   source              = "./modules/app_service"
+#   resource_group_name = "rg-app-service-eu"
+#   location            = "swedencentral"
+#   name_prefix         = "mywebapp"
+# }
+
+# module "my_container_apps" {
+#   source              = "./modules/container_apps"
+#   resource_group_name = "rg-ca-eu"
+#   location            = "swedencentral"
+#   name_prefix         = "myca"
+# }
+
+# module "my_aks" {
+#   source              = "./modules/aks"
+#   resource_group_name = "rg-aks-eu"
+#   location            = "swedencentral"
+#   name_prefix         = "myk8s"
+# }
