@@ -1,0 +1,45 @@
+# Gradle
+.gradle/
+build/
+out/
+*.jar
+*.war
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Runtime
+logs/
+*.log
+target/
+*.class
+
+# Docker
+docker-compose.override.yml
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+tfplan
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Build outputs
+dist/
+*.deb
+*.rpm

@@ -74,6 +74,13 @@ module "sweden" {
 # =========================
 # DATABASES
 # =========================
+module "app_service" {
+  source              = "./modules/app_service"
+  resource_group_name = "rg-app-service-eu"
+  location            = "swedencentral"
+  name_prefix         = "my-app"
+}
+
 module "databases" {
   source = "./modules/databases"
 
@@ -81,11 +88,10 @@ module "databases" {
   location            = "swedencentral"
   env                 = "global"
 
-  mysql_admin_user     = var.mysql_admin_user
-
-  sql_admin_user     = var.sql_admin_user
-
-  pg_admin_user     = var.pg_admin_user
+  mysql_admin_user            = var.mysql_admin_user
+  sql_admin_user              = var.sql_admin_user
+  pg_admin_user               = var.pg_admin_user
+  app_identity_principal_id   = module.app_service.app_identity_principal_id
 }
 
 # =========================

@@ -1,0 +1,80 @@
+package com.example.app.feature.routing
+
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import com.example.app.database.DatabaseService
+import com.example.app.database.DatabaseType
+import com.example.app.feature.dto.QueryRequest
+import com.example.app.feature.dto.ExecuteUpdateRequest
+import com.example.app.feature.dto.QueryResponse
+import com.example.app.feature.dto.ExecuteUpdateResponse
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
+private val dbService = DatabaseService()
+
+fun Route.databaseRoutes() {
+    route("/api/database") {
+        // List available databases
+        get("/list") {
+            val available = dbService.getAvailableDatabases()
+            call.respond(mapOf("databases" to available))
+        }
+
+        // Execute query
+        post("/query") {
+            val request = call.receive<QueryRequest>()
+            logger.info { "Executing query on ${request.database}" }
+
+            val dbType = parseDatabase(request.database)
+            val results = dbService.executeQuery(dbType, request.query) { rs ->
+                val metadata = rs.metaData
+                val row = mutableMapOf<String, Any?>()
+                for (i in 1..metadata.columnCount) {
+                    row[metadata.getColumnName(i)] = rs.getObject(i)
+                }
+                row
+            }
+
+            val columns = if (results.isNotEmpty()) {
+                results[0].keys.toList()
+            } else {
+                emptyList()
+            }
+
+            call.respond(QueryResponse(
+                database = request.database,
+                rowCount = results.size,
+                columns = columns,
+                rows = results
+            ))
+        }
+
+        // Execute update/insert/delete
+        post("/execute") {
+            val request = call.receive<ExecuteUpdateRequest>()
+            logger.info { "Executing update on ${request.database}" }
+
+            val dbType = parseDatabase(request.database)
+            val affectedRows = dbService.executeUpdate(dbType, request.sql, request.params.map { it as Any })
+
+            call.respond(ExecuteUpdateResponse(
+                database = request.database,
+                affectedRows = affectedRows,
+                message = "Successfully executed. Affected rows: $affectedRows"
+            ))
+        }
+    }
+}
+
+private fun parseDatabase(name: String): DatabaseType {
+    return when (name.lowercase()) {
+        "postgresql", "postgres", "pg" -> DatabaseType.PostgreSQL
+        "mysql" -> DatabaseType.MySQL
+        "sqlserver", "sql" -> DatabaseType.SQLServer
+        "cosmosdb", "cosmos" -> DatabaseType.CosmosDB
+        else -> throw IllegalArgumentException("Unknown database: $name")
+    }
+}

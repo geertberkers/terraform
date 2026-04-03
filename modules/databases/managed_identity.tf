@@ -1,0 +1,61 @@
+# ==========================================
+# PostgreSQL Managed Identity Access
+# ==========================================
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "postgres_admin" {
+  server_id             = azurerm_postgresql_flexible_server.postgres.id
+  principal_name        = "app-identity"  # Reference your app identity name
+  principal_object_id   = var.app_identity_principal_id
+  principal_type        = "ServicePrincipal"
+}
+
+# ==========================================
+# MySQL Managed Identity Access
+# ==========================================
+# MySQL doesn't support native Azure AD authentication
+# Use connection string management via Key Vault + app settings instead
+
+# ==========================================
+# SQL Server Managed Identity Access
+# ==========================================
+resource "azurerm_mssql_server_microsoft_support_auditing_policy" "sql_audit" {
+  server_id = azurerm_mssql_server.sql.id
+  enabled   = true
+}
+
+# Create contained users for SQL Server via Terraform
+# (Note: This requires using sql_admin credentials initially or a custom provider)
+resource "null_resource" "sql_contained_user" {
+  depends_on = [azurerm_mssql_database.sql_db]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      sqlcmd -S "${azurerm_mssql_server.sql.fully_qualified_domain_name}" \
+        -U "${var.sql_admin_user}" \
+        -P "${random_password.sql_admin.result}" \
+        -d "${azurerm_mssql_database.sql_db.name}" \
+        -Q "CREATE USER [app-identity] FROM EXTERNAL PROVIDER;"
+    EOT
+  }
+}
+
+# ==========================================
+# CosmosDB Managed Identity Access
+# ==========================================
+resource "azurerm_role_assignment" "cosmos_access" {
+  scope              = azurerm_cosmosdb_account.cosmos.id
+  role_definition_name = "Cosmos DB Built-in Data Contributor"
+  principal_id       = var.app_identity_principal_id
+}
+
+# ==========================================
+# Key Vault Access for the Managed Identity
+# ==========================================
+resource "azurerm_key_vault_access_policy" "app_identity_kv" {
+  key_vault_id       = azurerm_key_vault.kv.id
+  tenant_id          = data.azurerm_client_config.current.tenant_id
+  object_id          = var.app_identity_principal_id
+
+  secret_permissions = [
+    "Get", "List"
+  ]
+}
