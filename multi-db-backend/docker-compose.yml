@@ -45,10 +45,11 @@ services:
     volumes:
       - sqlserver_data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P '${SQLSERVER_PASSWORD:-SqlServer_Password123!}' -Q 'SELECT 1'"]
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/1433'"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 40s
 
   # Multi-Database Backend
   app:
@@ -82,8 +83,8 @@ services:
         condition: service_healthy
       mysql:
         condition: service_healthy
-      # sqlserver:
-      #   condition: service_started
+      sqlserver:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
