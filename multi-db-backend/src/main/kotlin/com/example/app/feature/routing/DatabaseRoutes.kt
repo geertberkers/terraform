@@ -31,9 +31,9 @@ fun Route.databaseRoutes() {
             val dbType = parseDatabase(request.database)
             val results = dbService.executeQuery(dbType, request.query) { rs ->
                 val metadata = rs.metaData
-                val row = mutableMapOf<String, Any?>()
+                val row = mutableMapOf<String, String?>()
                 for (i in 1..metadata.columnCount) {
-                    row[metadata.getColumnName(i)] = rs.getObject(i)
+                    row[metadata.getColumnName(i)] = rs.getObject(i)?.toString()
                 }
                 row
             }

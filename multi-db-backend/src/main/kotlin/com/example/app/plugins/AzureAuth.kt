@@ -1,6 +1,6 @@
 package com.example.app.plugins
 
-import com.azure.identity.DefaultAzureCredential
+import com.azure.identity.DefaultAzureCredentialBuilder
 import com.example.app.database.DatabaseFactory
 import mu.KotlinLogging
 
@@ -8,7 +8,7 @@ private val logger = KotlinLogging.logger {}
 
 fun initializeAzureAuth() {
     try {
-        val credential = DefaultAzureCredential()
+        val credential = DefaultAzureCredentialBuilder().build()
         logger.info { "Azure Managed Identity authentication initialized successfully" }
         // Store credential for later use if needed
         System.setProperty("azure.credential.initialized", "true")

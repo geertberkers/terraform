@@ -13,31 +13,35 @@ private val logger = KotlinLogging.logger {}
 fun Application.configureStatusPages() {
     install(StatusPages) {
         exception<AppError.NotFound> { call, cause ->
-            logger.warn { "Not found: ${cause.message}" }
+            val message = cause.message ?: "Resource not found"
+            logger.warn { "Not found: $message" }
             call.respond(
                 HttpStatusCode.NotFound,
-                ErrorResponse(404, "Not Found", cause.message)
+                ErrorResponse(404, "Not Found", message)
             )
         }
         exception<AppError.InvalidDatabase> { call, cause ->
-            logger.warn { "Invalid database: ${cause.message}" }
+            val message = cause.message ?: "Invalid database"
+            logger.warn { "Invalid database: $message" }
             call.respond(
                 HttpStatusCode.BadRequest,
-                ErrorResponse(400, "Invalid Database", cause.message)
+                ErrorResponse(400, "Invalid Database", message)
             )
         }
         exception<AppError.DatabaseError> { call, cause ->
-            logger.error { "Database error: ${cause.message}" }
+            val message = cause.message ?: "Database error"
+            logger.error { "Database error: $message" }
             call.respond(
                 HttpStatusCode.InternalServerError,
-                ErrorResponse(500, "Database Error", cause.message)
+                ErrorResponse(500, "Database Error", message)
             )
         }
         exception<AppError.Unauthorized> { call, cause ->
-            logger.warn { "Unauthorized: ${cause.message}" }
+            val message = cause.message ?: "Unauthorized"
+            logger.warn { "Unauthorized: $message" }
             call.respond(
                 HttpStatusCode.Unauthorized,
-                ErrorResponse(401, "Unauthorized", cause.message)
+                ErrorResponse(401, "Unauthorized", message)
             )
         }
         exception<Throwable> { call, cause ->

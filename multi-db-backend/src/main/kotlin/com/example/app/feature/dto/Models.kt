@@ -19,7 +19,7 @@ data class QueryResponse(
     val database: String,
     val rowCount: Int,
     val columns: List<String>,
-    val rows: List<Map<String, Any?>>
+    val rows: List<Map<String, String?>>
 )
 
 @Serializable

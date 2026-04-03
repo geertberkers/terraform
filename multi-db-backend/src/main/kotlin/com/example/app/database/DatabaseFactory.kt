@@ -1,7 +1,7 @@
 package com.example.app.database
 
-import com.azure.identity.DefaultAzureCredential
-import com.microsoft.sqlserver.jdbc.SQLServerDataSource
+import com.azure.core.credential.TokenRequestContext
+import com.azure.identity.DefaultAzureCredentialBuilder
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import mu.KotlinLogging
@@ -97,7 +97,7 @@ object DatabaseFactory {
         }
     }
 
-    private fun initCosmosDB(): DataSource {
+    private fun initCosmosDB(): DataSource? {
         // CosmosDB typically uses SDK, not JDBC
         // This is a placeholder for future SDK integration
         logger.info { "CosmosDB integration prepared for SDK setup" }
@@ -106,12 +106,13 @@ object DatabaseFactory {
 
     private fun getAzureTokenForPostgres(): String {
         return try {
-            val credential = DefaultAzureCredential()
+            val credential = DefaultAzureCredentialBuilder().build()
             val token = credential.getToken(
-                com.azure.core.credential.TokenRequestContext()
+                TokenRequestContext()
                     .addScopes("https://ossrdbms-aad.database.windows.net/.default")
-            )
-            token.token
+            ).block()
+
+            token?.token ?: throw IllegalStateException("Azure token retrieval returned null")
         } catch (e: Exception) {
             logger.error("Failed to get Azure token", e)
             throw e
