@@ -303,6 +303,7 @@
     </div>
 
     <script>
+        <#noparse>
         let selectedDatabase = null;
 
         // Database selection
@@ -438,6 +439,7 @@
             const first = document.querySelector('.database-list li');
             if (first) first.click();
         });
+        </#noparse>
     </script>
 </body>
 </html>

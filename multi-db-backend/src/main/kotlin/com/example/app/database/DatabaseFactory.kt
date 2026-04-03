@@ -16,10 +16,33 @@ object DatabaseFactory {
     private var cosmosDataSource: DataSource? = null
 
     fun init() {
-        pgDataSource = initPostgres()
-        mysqlDataSource = initMySQL()
-        sqlServerDataSource = initSQLServer()
-        cosmosDataSource = initCosmosDB()
+        try {
+            pgDataSource = initPostgres()
+            logger.info { "PostgreSQL connection initialized" }
+        } catch (e: Exception) {
+            logger.warn { "Failed to initialize PostgreSQL: ${e.message}" }
+        }
+
+        try {
+            mysqlDataSource = initMySQL()
+            logger.info { "MySQL connection initialized" }
+        } catch (e: Exception) {
+            logger.warn { "Failed to initialize MySQL: ${e.message}" }
+        }
+
+        try {
+            sqlServerDataSource = initSQLServer()
+            logger.info { "SQL Server connection initialized" }
+        } catch (e: Exception) {
+            logger.warn { "Failed to initialize SQL Server: ${e.message}" }
+        }
+
+        try {
+            cosmosDataSource = initCosmosDB()
+            logger.info { "CosmosDB connection initialized" }
+        } catch (e: Exception) {
+            logger.warn { "Failed to initialize CosmosDB: ${e.message}" }
+        }
     }
 
     fun getPostgresDataSource(): DataSource? = pgDataSource

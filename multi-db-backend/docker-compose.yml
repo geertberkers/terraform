@@ -1,19 +1,19 @@
-version: '3.8'
+
 
 services:
   # PostgreSQL
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_password
-      POSTGRES_DB: appdb
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_password}
+      POSTGRES_DB: ${POSTGRES_DB:-appdb}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,14 +22,14 @@ services:
   mysql:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: mysql_password
-      MYSQL_DATABASE: appdb
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-mysql_password}
+      MYSQL_DATABASE: ${MYSQL_DB:-appdb}
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_PASSWORD:-mysql_password}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,14 +38,14 @@ services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
-      SA_PASSWORD: "SqlServer_Password123!"
+      SA_PASSWORD: "${SQLSERVER_PASSWORD:-SqlServer_Password123!}"
       ACCEPT_EULA: "Y"
     ports:
-      - "1433:1433"
+      - "${SQLSERVER_PORT:-1433}:1433"
     volumes:
       - sqlserver_data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'SqlServer_Password123!' -Q 'SELECT 1'"]
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P '${SQLSERVER_PASSWORD:-SqlServer_Password123!}' -Q 'SELECT 1'"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -56,25 +56,25 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "${PORT:-8080}:8080"
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
-      POSTGRES_DB: appdb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DB: ${POSTGRES_DB:-appdb}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_password}
       
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
-      MYSQL_DB: appdb
-      MYSQL_USER: root
-      MYSQL_PASSWORD: mysql_password
+      MYSQL_DB: ${MYSQL_DB:-appdb}
+      MYSQL_USER: ${MYSQL_USER:-root}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-mysql_password}
       
       SQLSERVER_HOST: sqlserver
       SQLSERVER_PORT: 1433
-      SQLSERVER_DB: master
-      SQLSERVER_USER: sa
-      SQLSERVER_PASSWORD: "SqlServer_Password123!"
+      SQLSERVER_DB: ${SQLSERVER_DB:-master}
+      SQLSERVER_USER: ${SQLSERVER_USER:-sa}
+      SQLSERVER_PASSWORD: ${SQLSERVER_PASSWORD:-SqlServer_Password123!}
       
       PORT: 8080
     depends_on:
@@ -82,8 +82,8 @@ services:
         condition: service_healthy
       mysql:
         condition: service_healthy
-      sqlserver:
-        condition: service_healthy
+      # sqlserver:
+      #   condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s

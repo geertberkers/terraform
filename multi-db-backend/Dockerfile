@@ -9,7 +9,7 @@ COPY gradle gradle/
 COPY src src/
 
 # Build JAR
-RUN gradle fatJar --no-daemon
+RUN gradle shadowJar --no-daemon
 
 # Runtime stage
 FROM eclipse-temurin:17-jre-alpine
