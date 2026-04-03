@@ -25,10 +25,6 @@ provider "azurerm" {
   use_oidc = true
 }
 
-# variable "ssh_public_key" {
-#   type = string
-# }
-
 # =========================
 # SWITZERLAND
 # =========================
