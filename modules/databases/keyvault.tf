@@ -60,3 +60,13 @@ resource "azurerm_key_vault_secret" "sql_pass" {
   value        = random_password.sql_admin.result
   key_vault_id = azurerm_key_vault.kv.id
 }
+
+resource "azurerm_key_vault_secret" "cosmos_connection" {
+  name         = "cosmos-connection"
+  value        = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
+  key_vault_id = azurerm_key_vault.kv.id
+
+  depends_on = [
+    azurerm_cosmosdb_account.cosmos
+  ]
+}

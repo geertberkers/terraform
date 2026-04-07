@@ -38,6 +38,10 @@ resource "azurerm_cosmosdb_sql_database" "db" {
   name                = "appdbcosmos"
   resource_group_name = azurerm_resource_group.db_rg.name
   account_name        = azurerm_cosmosdb_account.cosmos.name
+
+  depends_on = [
+    azurerm_cosmosdb_account.cosmos
+  ]
 }
 
 resource "azurerm_cosmosdb_sql_container" "container" {
@@ -47,4 +51,13 @@ resource "azurerm_cosmosdb_sql_container" "container" {
   database_name       = azurerm_cosmosdb_sql_database.db.name
 
   partition_key_paths = ["/id"]
+  resource "azurerm_cosmosdb_sql_database" "db" {
+  name                = "appdbcosmos"
+  resource_group_name = azurerm_resource_group.db_rg.name
+  account_name        = azurerm_cosmosdb_account.cosmos.name
+
+  depends_on = [
+    azurerm_cosmosdb_account.cosmos
+  ]
+
 }
