@@ -47,5 +47,11 @@ resource "azurerm_cosmosdb_sql_container" "container" {
 
 data "azurerm_role_definition" "cosmos_contributor" {
   name  = "Cosmos DB Built-in Data Contributor"
-  scope = azurerm_cosmosdb_account.cosmos.id
+  scope = data.azurerm_subscription.current.id
+}
+
+resource "azurerm_role_assignment" "cosmos_access" {
+  scope                = azurerm_cosmosdb_account.cosmos.id
+  role_definition_name = "Cosmos DB Built-in Data Contributor"
+  principal_id         = var.app_identity_principal_id
 }
