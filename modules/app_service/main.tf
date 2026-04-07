@@ -10,7 +10,7 @@ resource "random_string" "suffix" {
 }
 
 resource "azurerm_service_plan" "asp" {
-  name                = "${var.name_prefix}-app-${random_string.suffix.result}"
+  name                = "${var.name_prefix}-app"
   location            = azurerm_resource_group.app_rg.location
   resource_group_name = azurerm_resource_group.app_rg.name
   os_type             = "Linux"
