@@ -11,17 +11,11 @@ terraform {
       version = "~> 3.0"
     }
   }
-
-  # Backend stays in backend.tf
 }
 
-# =========================
-# AZURE PROVIDER (FIXED)
-# =========================
 provider "azurerm" {
   features {}
 
-  # 🔥 REQUIRED for GitHub OIDC authentication
   use_oidc = true
 }
 
@@ -68,7 +62,7 @@ module "sweden" {
 }
 
 # =========================
-# DATABASES
+# APP SERVICE
 # =========================
 module "app_service" {
   source              = "./modules/app_service"
@@ -77,6 +71,9 @@ module "app_service" {
   name_prefix         = "my-web-service"
 }
 
+# =========================
+# DATABASES
+# =========================
 module "databases" {
   source = "./modules/databases"
 
@@ -88,7 +85,7 @@ module "databases" {
   sql_admin_user   = var.sql_admin_user
   pg_admin_user    = var.pg_admin_user
 
-  app_identity_principal_id = module.app_service.app_identity_principal_id
+  app_identity_principal_id = module.app_service.principal_id
 
   sql_database_name = var.sql_database_name
 }
