@@ -99,7 +99,7 @@ module "databases" {
   app_service_name = module.app_service.app_name
   app_service_rg   = "rg-app-service-eu"
 
-]}
+}
 
 # =========================
 # APP HOSTING EXAMPLES
