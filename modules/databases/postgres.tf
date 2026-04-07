@@ -15,6 +15,11 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
 
   public_network_access_enabled = true
 
+  authentication {
+    active_directory_auth_enabled = true
+    password_auth_enabled         = true
+  }
+
   lifecycle {
     ignore_changes = [
       zone,
