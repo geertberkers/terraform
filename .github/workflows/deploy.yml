@@ -44,7 +44,7 @@ jobs:
         working-directory: ${{ env.WORKING_DIR }}
 
       - name: Build FAT JAR
-        run: ./gradlew runFatJar
+        run: ./gradlew shadowJar
         working-directory: ${{ env.WORKING_DIR }}
 
       - name: Upload artifact
