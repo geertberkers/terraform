@@ -38,17 +38,13 @@ resource "azurerm_linux_web_app" "app" {
     always_on = true
 
     application_stack {
-      java_version        = "17"
-      java_server         = "TOMCAT"
-      java_server_version = "10.1"
+      docker_image_name   = "ghcr.io/geertberkers/terraform/multi-db-backend:latest"
+      docker_registry_url = "https://ghcr.io"
     }
-
-    app_command_line = "java -jar /home/site/wwwroot/app.jar"
   }
 
   app_settings = {
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
-    "WEBSITE_USE_32BIT_WORKER_PROCESS"    = "false"
-    "PORT"                                = "8080"
+    "WEBSITES_PORT"                       = "8080"
   }
 }
