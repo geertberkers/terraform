@@ -35,17 +35,17 @@ resource "azurerm_linux_web_app" "app" {
   }
 
   site_config {
-    always_on = true
-
-    application_stack {
-      docker_image_name   = "ghcr.io/geertberkers/terraform/multi-db-backend:latest"
-      docker_registry_url = "https://ghcr.io"
-    }
+    always_on        = true
+    linux_fx_version = "DOCKER|ghcr.io/geertberkers/terraform/multi-db-backend:latest"
   }
 
   app_settings = {
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
     "WEBSITES_PORT"                       = "8080"
+
+    "DOCKER_REGISTRY_SERVER_URL"      = "https://ghcr.io"
+    "DOCKER_REGISTRY_SERVER_USERNAME" = var.github_user
+    "DOCKER_REGISTRY_SERVER_PASSWORD" = var.github_token
   }
 
   depends_on = [
