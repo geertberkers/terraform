@@ -74,7 +74,7 @@ module "app_service" {
   source              = "./modules/app_service"
   resource_group_name = "rg-app-service-eu"
   location            = "westeurope"
-  name_prefix         = "my-app"
+  name_prefix         = "my-web-app"
 }
 
 module "databases" {
