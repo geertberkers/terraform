@@ -26,7 +26,7 @@ resource "azurerm_mssql_firewall_rule" "allow_azure_services" {
 }
 
 resource "azurerm_mssql_database" "db" {
-  name      = "appdb"
+  name      = "${var.env}-db"
   server_id = azurerm_mssql_server.sql.id
 
   sku_name = "Basic"

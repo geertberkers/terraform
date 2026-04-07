@@ -2,10 +2,11 @@
 # PostgreSQL Managed Identity Access
 # ==========================================
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "postgres_admin" {
-  server_id           = azurerm_postgresql_flexible_server.postgres.id
-  principal_name      = "app-identity" # Reference your app identity name
-  principal_object_id = var.app_identity_principal_id
-  principal_type      = "ServicePrincipal"
+  server_name         = azurerm_postgresql_flexible_server.postgres.name
+  resource_group_name = var.resource_group_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = var.app_identity_principal_id
+  principal_name      = "app-identity"
 }
 
 # ==========================================
