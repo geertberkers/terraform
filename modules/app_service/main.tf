@@ -47,4 +47,8 @@ resource "azurerm_linux_web_app" "app" {
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
     "WEBSITES_PORT"                       = "8080"
   }
+
+  depends_on = [
+    azurerm_service_plan.asp
+  ]
 }
