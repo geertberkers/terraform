@@ -42,10 +42,6 @@ resource "azurerm_linux_web_app" "app" {
   app_settings = {
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
     "WEBSITES_PORT"                       = "8080"
-
-    "DOCKER_REGISTRY_SERVER_URL"      = "https://ghcr.io"
-    "DOCKER_REGISTRY_SERVER_USERNAME" = var.github_user
-    "DOCKER_REGISTRY_SERVER_PASSWORD" = var.github_token
   }
 
   depends_on = [
