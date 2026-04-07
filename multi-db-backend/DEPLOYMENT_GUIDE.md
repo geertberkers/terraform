@@ -210,6 +210,8 @@ sqlserver://server.database.windows.net:1433;database=master;authentication=Acti
 ```bash
 # View logs
 az webapp log tail --name your-app-name --resource-group your-rg
+az webapp log tail --name my-web-service-app --resource-group rg-app-service-eu
+
 ```
 
 ### Docker logs
@@ -257,9 +259,11 @@ docker-compose up --build
 ```bash
 # Check logs
 az webapp log tail --name your-app-name --resource-group your-rg
+az webapp log tail --name my-web-service-app --resource-group rg-app-service-eu
 
 # Verify configuration
 az webapp config appsettings list --name your-app-name --resource-group your-rg
+az webapp config appsettings list --name my-web-service-app --resource-group rg-app-service-eu
 ```
 
 ## Project Structure
