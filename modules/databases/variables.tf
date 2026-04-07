@@ -26,8 +26,12 @@ variable "sql_database_name" {
   type = string
 }
 
-variable "app_identity_principal_id" {
+variable "app_service_name" {
   type        = string
-  description = "Principal ID of the managed identity for database access"
-  default     = ""
+  description = "Name of the App Service to read identity from"
+}
+
+variable "app_service_rg" {
+  type        = string
+  description = "Resource group of the App Service"
 }
