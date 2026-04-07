@@ -36,7 +36,7 @@ resource "null_resource" "sql_contained_user" {
       sqlcmd -S "${azurerm_mssql_server.sql.fully_qualified_domain_name}" \
         -U "${var.sql_admin_user}" \
         -P "${random_password.sql_admin.result}" \
-        -d "${var.sql_database_name}" \
+        -d "master" \
         -Q "CREATE USER [app-identity] FROM EXTERNAL PROVIDER;"
     EOT
   }
