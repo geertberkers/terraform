@@ -20,15 +20,6 @@ provider "azurerm" {
 }
 
 # =========================
-# SHARED IDENTITY (FIX)
-# =========================
-resource "azurerm_user_assigned_identity" "app_identity" {
-  name                = "app-identity-global"
-  location            = "westeurope"
-  resource_group_name = "rg-app-service-eu"
-}
-
-# =========================
 # SWITZERLAND
 # =========================
 module "switzerland" {
@@ -71,7 +62,7 @@ module "sweden" {
 }
 
 # =========================
-# APP SERVICE
+# APP SERVICE (SYSTEM ASSIGNED IDENTITY)
 # =========================
 module "app_service" {
   source              = "./modules/app_service"
@@ -98,7 +89,6 @@ module "databases" {
 
   app_service_name = module.app_service.app_name
   app_service_rg   = "rg-app-service-eu"
-
 }
 
 # =========================
