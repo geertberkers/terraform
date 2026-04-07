@@ -44,8 +44,3 @@ resource "azurerm_cosmosdb_sql_container" "container" {
 
   partition_key_paths = ["/id"]
 }
-
-# data "azurerm_role_definition" "cosmos_contributor" {
-#  name  = "Cosmos DB Built-in Data Contributor"
-#   scope = data.azurerm_subscription.current.id
-# }

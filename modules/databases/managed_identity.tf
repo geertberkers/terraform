@@ -43,10 +43,15 @@ resource "null_resource" "sql_contained_user" {
 # ==========================================
 # CosmosDB Managed Identity Access
 # ==========================================
+data "azurerm_role_definition" "cosmos" {
+  name  = "Cosmos DB Built-in Data Contributor"
+  scope = azurerm_cosmosdb_account.cosmos.id
+}
+
 resource "azurerm_role_assignment" "cosmos_access" {
-  scope                = azurerm_cosmosdb_account.cosmos.id
-  role_definition_name = "Cosmos DB Built-in Data Contributor"
-  principal_id         = var.app_identity_principal_id
+  scope              = azurerm_cosmosdb_account.cosmos.id
+  role_definition_id = data.azurerm_role_definition.cosmos.id
+  principal_id       = var.app_identity_principal_id
 }
 
 # ==========================================
