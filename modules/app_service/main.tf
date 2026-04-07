@@ -1,22 +1,26 @@
+resource "azurerm_resource_group" "app_rg" {
+  name     = var.resource_group_name
+  location = var.location
+}
 
 resource "azurerm_service_plan" "asp" {
   name                = "${var.name_prefix}-asp"
-  location            = var.location
-  resource_group_name = var.resource_group_name
+  location            = azurerm_resource_group.app_rg.location
+  resource_group_name = azurerm_resource_group.app_rg.name
   os_type             = "Linux"
   sku_name            = "B2"
 }
 
 resource "azurerm_user_assigned_identity" "app_identity" {
   name                = "${var.name_prefix}-identity"
-  location            = var.location
-  resource_group_name = var.resource_group_name
+  location            = azurerm_resource_group.app_rg.location
+  resource_group_name = azurerm_resource_group.app_rg.name
 }
 
 resource "azurerm_linux_web_app" "app" {
   name                = "${var.name_prefix}-app"
-  location            = var.location
-  resource_group_name = var.resource_group_name
+  location            = azurerm_resource_group.app_rg.location
+  resource_group_name = azurerm_resource_group.app_rg.name
   service_plan_id     = azurerm_service_plan.asp.id
 
   identity {
