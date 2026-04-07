@@ -28,6 +28,10 @@ resource "azurerm_cosmosdb_account" "cosmos" {
   lifecycle {
     prevent_destroy = true
   }
+
+  identity {
+    type = "SystemAssigned"
+  }
 }
 
 resource "azurerm_cosmosdb_sql_database" "db" {

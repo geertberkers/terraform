@@ -49,9 +49,9 @@ data "azurerm_role_definition" "cosmos" {
 }
 
 resource "azurerm_role_assignment" "cosmos_access" {
-  scope              = azurerm_cosmosdb_account.cosmos.id
-  role_definition_id = data.azurerm_role_definition.cosmos.id
-  principal_id       = var.app_identity_principal_id
+  scope                = azurerm_cosmosdb_account.cosmos.id
+  role_definition_name = "Contributor"
+  principal_id         = var.app_identity_principal_id
 }
 
 # ==========================================
