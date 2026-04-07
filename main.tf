@@ -85,6 +85,8 @@ module "databases" {
   sql_admin_user   = var.sql_admin_user
   pg_admin_user    = var.pg_admin_user
 
+  app_service_name = module.app_service.app_name
+  app_service_rg   = "rg-app-service-eu"
   app_identity_principal_id = data.azurerm_linux_web_app.app.identity[0].principal_id
 
   sql_database_name = var.sql_database_name
