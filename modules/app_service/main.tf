@@ -31,9 +31,8 @@ resource "azurerm_linux_web_app" "app" {
     always_on = true
 
     application_stack {
-      docker {
-        image = "ghcr.io/geertberkers/terraform/multi-db-backend:latest"
-      }
+      docker_image     = "ghcr.io/geertberkers/terraform/multi-db-backend"
+      docker_image_tag = "latest"
     }
   }
 
