@@ -15,5 +15,6 @@ variable "pg_admin_user" {
 }
 
 variable "sql_database_name" {
-  type = string
+  type    = string
+  default = "app-db"
 }
