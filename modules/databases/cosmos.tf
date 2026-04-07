@@ -12,7 +12,6 @@ resource "azurerm_cosmosdb_account" "cosmos" {
   offer_type = "Standard"
   kind       = "GlobalDocumentDB"
 
-  # ✅ Required for serverless
   capabilities {
     name = "EnableServerless"
   }
@@ -26,7 +25,6 @@ resource "azurerm_cosmosdb_account" "cosmos" {
     failover_priority = 0
   }
 
-  # ✅ Prevent accidental deletion (VERY IMPORTANT)
   lifecycle {
     prevent_destroy = true
   }
@@ -45,6 +43,9 @@ resource "azurerm_cosmosdb_sql_container" "container" {
   database_name       = azurerm_cosmosdb_sql_database.db.name
 
   partition_key_paths = ["/id"]
+}
 
-  partition_key_kind = "Hash"
+data "azurerm_role_definition" "cosmos_contributor" {
+  name  = "Cosmos DB Built-in Data Contributor"
+  scope = azurerm_cosmosdb_account.cosmos.id
 }
