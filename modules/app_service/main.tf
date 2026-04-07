@@ -35,8 +35,12 @@ resource "azurerm_linux_web_app" "app" {
   }
 
   site_config {
-    always_on        = true
-    linux_fx_version = "DOCKER|ghcr.io/geertberkers/terraform/multi-db-backend:latest"
+    always_on = true
+
+    application_stack {
+      docker_image     = "ghcr.io/geertberkers/terraform/multi-db-backend"
+      docker_image_tag = "latest"
+    }
   }
 
   app_settings = {
