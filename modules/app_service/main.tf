@@ -3,6 +3,12 @@ resource "azurerm_resource_group" "app_rg" {
   location = var.location
 }
 
+resource "random_string" "suffix" {
+  length  = 5
+  special = false
+  upper   = false
+}
+
 resource "azurerm_service_plan" "asp" {
   name                = "${var.name_prefix}-app-${random_string.suffix.result}"
   location            = azurerm_resource_group.app_rg.location
