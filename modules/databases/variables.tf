@@ -22,6 +22,10 @@ variable "pg_admin_user" {
   type = string
 }
 
+variable "sql_database_name" {
+  type = string
+}
+
 variable "app_identity_principal_id" {
   type        = string
   description = "Principal ID of the managed identity for database access"
