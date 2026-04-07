@@ -1,9 +1,16 @@
+
 resource "azurerm_service_plan" "asp" {
   name                = "${var.name_prefix}-asp"
   location            = var.location
   resource_group_name = var.resource_group_name
   os_type             = "Linux"
-  sku_name            = "B2" # B2 for Java/Kotlin apps
+  sku_name            = "B2"
+}
+
+resource "azurerm_user_assigned_identity" "app_identity" {
+  name                = "${var.name_prefix}-identity"
+  location            = var.location
+  resource_group_name = var.resource_group_name
 }
 
 resource "azurerm_linux_web_app" "app" {
@@ -12,8 +19,13 @@ resource "azurerm_linux_web_app" "app" {
   resource_group_name = var.resource_group_name
   service_plan_id     = azurerm_service_plan.asp.id
 
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.app_identity.id]
+  }
+
   site_config {
-    always_on = true # Required for Java apps
+    always_on = true
 
     application_stack {
       java_version        = "17"
@@ -28,9 +40,5 @@ resource "azurerm_linux_web_app" "app" {
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
     "WEBSITE_USE_32BIT_WORKER_PROCESS"    = "false"
     "PORT"                                = "8080"
-  }
-
-  identity {
-    type = "UserAssigned"
   }
 }
