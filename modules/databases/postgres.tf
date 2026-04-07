@@ -7,7 +7,7 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
   administrator_password = random_password.pg_admin.result
 
   active_directory_auth_enabled = true
-  sku_name = "B_Standard_B1ms"
+  sku_name                      = "B_Standard_B1ms"
 
   storage_mb = 32768
   version    = "14"
