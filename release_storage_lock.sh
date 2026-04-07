@@ -1,0 +1,1 @@
+az storage blob lease break   --account-name tfstate12792   --container-name tfstate   --blob-name multi-cloud.tfstate
