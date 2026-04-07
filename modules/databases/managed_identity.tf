@@ -45,7 +45,7 @@ resource "null_resource" "sql_contained_user" {
 # ==========================================
 data "azurerm_role_definition" "cosmos" {
   name  = "Cosmos DB Built-in Data Contributor"
-  scope = azurerm_cosmosdb_account.cosmos.id
+  scope = data.azurerm_subscription.current.id
 }
 
 resource "azurerm_role_assignment" "cosmos_access" {
