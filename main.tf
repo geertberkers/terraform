@@ -99,9 +99,7 @@ module "databases" {
   app_service_name = module.app_service.app_name
   app_service_rg   = "rg-app-service-eu"
 
-  # FIX: stable UUID source
-  app_identity_principal_id = azurerm_user_assigned_identity.app_identity.principal_id
-}
+]}
 
 # =========================
 # APP HOSTING EXAMPLES
