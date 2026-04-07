@@ -1,3 +1,8 @@
+data "azurerm_linux_web_app" "app" {
+  name                = var.app_service_name
+  resource_group_name = var.app_service_rg
+}
+
 # ==========================================
 # PostgreSQL Managed Identity Access
 # ==========================================
