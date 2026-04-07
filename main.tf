@@ -20,6 +20,15 @@ provider "azurerm" {
 }
 
 # =========================
+# SHARED IDENTITY (FIX)
+# =========================
+resource "azurerm_user_assigned_identity" "app_identity" {
+  name                = "app-identity-global"
+  location            = "westeurope"
+  resource_group_name = "rg-app-service-eu"
+}
+
+# =========================
 # SWITZERLAND
 # =========================
 module "switzerland" {
@@ -69,6 +78,9 @@ module "app_service" {
   resource_group_name = "rg-app-service-eu"
   location            = "westeurope"
   name_prefix         = "my-web-service"
+
+  # (IMPORTANT if your module supports it later)
+  app_identity_id = azurerm_user_assigned_identity.app_identity.id
 }
 
 # =========================
@@ -85,10 +97,13 @@ module "databases" {
   sql_admin_user   = var.sql_admin_user
   pg_admin_user    = var.pg_admin_user
 
+  sql_database_name = var.sql_database_name
+
   app_service_name = module.app_service.app_name
   app_service_rg   = "rg-app-service-eu"
 
-  sql_database_name = var.sql_database_name
+  # FIX: stable UUID source
+  app_identity_principal_id = azurerm_user_assigned_identity.app_identity.principal_id
 }
 
 # =========================
