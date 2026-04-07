@@ -27,8 +27,10 @@ resource "azurerm_mssql_server_microsoft_support_auditing_policy" "sql_audit" {
 # Create contained users for SQL Server via Terraform
 # (Note: This requires using sql_admin credentials initially or a custom provider)
 resource "null_resource" "sql_contained_user" {
-  depends_on = [azurerm_mssql_server.sql]
-
+  depends_on = [
+    azurerm_mssql_database.db
+  ]
+  
   provisioner "local-exec" {
     command = <<-EOT
       sqlcmd -S "${azurerm_mssql_server.sql.fully_qualified_domain_name}" \
