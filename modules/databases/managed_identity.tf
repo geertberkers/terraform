@@ -30,7 +30,7 @@ resource "null_resource" "sql_contained_user" {
   depends_on = [
     azurerm_mssql_database.db
   ]
-  
+
   provisioner "local-exec" {
     command = <<-EOT
       sqlcmd -S "${azurerm_mssql_server.sql.fully_qualified_domain_name}" \
