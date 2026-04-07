@@ -78,9 +78,6 @@ module "app_service" {
   resource_group_name = "rg-app-service-eu"
   location            = "westeurope"
   name_prefix         = "my-web-service"
-
-  # (IMPORTANT if your module supports it later)
-  app_identity_id = azurerm_user_assigned_identity.app_identity.id
 }
 
 # =========================
