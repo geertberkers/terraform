@@ -14,3 +14,6 @@ variable "pg_admin_user" {
   type = string
 }
 
+variable "sql_database_name" {
+  type = string
+}
