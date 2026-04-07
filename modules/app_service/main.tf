@@ -17,12 +17,6 @@ resource "azurerm_service_plan" "asp" {
   sku_name            = "B2"
 }
 
-resource "azurerm_user_assigned_identity" "app_identity" {
-  name                = "${var.name_prefix}-identity"
-  location            = azurerm_resource_group.app_rg.location
-  resource_group_name = azurerm_resource_group.app_rg.name
-}
-
 resource "azurerm_linux_web_app" "app" {
   name                = "${var.name_prefix}-app"
   location            = azurerm_resource_group.app_rg.location
@@ -30,8 +24,7 @@ resource "azurerm_linux_web_app" "app" {
   service_plan_id     = azurerm_service_plan.asp.id
 
   identity {
-    type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.app_identity.id]
+    type = "SystemAssigned"
   }
 
   site_config {
