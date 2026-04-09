@@ -68,19 +68,21 @@ module "sweden" {
 }
 
 # =========================
-# DATABASES - Rollback
+# IDENTITY
 # =========================
-module "app_service" {
-  source              = "./modules/app_service"
-  resource_group_name = "rg-app-service-eu"
+resource "azurerm_user_assigned_identity" "app_identity" {
+  name                = "my-web-service-identity"
   location            = "westeurope"
-  name_prefix         = "my-web-service"
+  resource_group_name = "rg-terraform-app-service-eu"
 }
 
+# =========================
+# DATABASES
+# =========================
 module "databases" {
   source = "./modules/databases"
 
-  resource_group_name = "rg-databases-europe"
+  resource_group_name = "rg-terraform-databases-europe"
   location            = "swedencentral"
   env                 = "global"
 
@@ -88,9 +90,47 @@ module "databases" {
   sql_admin_user   = var.sql_admin_user
   pg_admin_user    = var.pg_admin_user
 
-  app_identity_principal_id = module.app_service.app_identity_principal_id
+  app_identity_principal_id = azurerm_user_assigned_identity.app_identity.principal_id
 
   sql_database_name = var.sql_database_name
+}
+
+# =========================
+# APP SERVICE
+# =========================
+module "app_service" {
+  source              = "./modules/app_service"
+  resource_group_name = "rg-terraform-app-service-eu"
+  location            = "westeurope"
+  name_prefix         = "my-web-service"
+  identity_id         = azurerm_user_assigned_identity.app_identity.id
+
+  postgres_config = {
+    host     = module.databases.postgres_fqdn
+    db       = "appdb"
+    user     = var.pg_admin_user
+    password = module.databases.postgres_password
+  }
+
+  mysql_config = {
+    host     = module.databases.mysql_fqdn
+    db       = "appdb"
+    user     = var.mysql_admin_user
+    password = module.databases.mysql_password
+  }
+
+  sqlserver_config = {
+    host     = module.databases.sql_server_fqdn
+    db       = "appdb"
+    user     = var.sql_admin_user
+    password = module.databases.sql_server_password
+  }
+
+  docker_registry_config = {
+    url      = "https://ghcr.io"
+    username = "geertberkers"
+    password = var.gh_pat
+  }
 }
 
 # =========================
@@ -101,7 +141,7 @@ module "databases" {
 
 # module "my_app_service" {
 #   source              = "./modules/app_service"
-#   resource_group_name = "rg-app-service-eu"
+#   resource_group_name = "rg-terraform-app-service-eu"
 #   location            = "swedencentral"
 #   name_prefix         = "mywebapp"
 # }
