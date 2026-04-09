@@ -16,34 +16,55 @@ object DatabaseFactory {
 
     fun init() {
         logger = getAppLogger()
-        
-        try {
-            pgDataSource = initPostgres()
-            logger.info("PostgreSQL connection initialized")
-        } catch (e: Exception) {
-            logger.warn("Failed to initialize PostgreSQL: ${e.message}", e)
+        logger.info("=== DATABASE INITIALIZATION BEGIN ===")
+
+        // PostgreSQL
+        val postgresHost = System.getenv("POSTGRES_HOST")
+        if (postgresHost != null && postgresHost.isNotEmpty()) {
+            logger.info("Attempting PostgreSQL connection to: $postgresHost:${System.getenv("POSTGRES_PORT") ?: "5432"}")
+            try {
+                pgDataSource = initPostgres()
+                logger.info("✓ PostgreSQL connection initialized successfully")
+            } catch (e: Exception) {
+                logger.warn("✗ Failed to initialize PostgreSQL: ${e.message}", e)
+            }
+        } else {
+            logger.info("PostgreSQL not configured (POSTGRES_HOST not set)")
         }
 
-        try {
-            mysqlDataSource = initMySQL()
-            logger.info("MySQL connection initialized")
-        } catch (e: Exception) {
-            logger.warn("Failed to initialize MySQL: ${e.message}", e)
+        // MySQL
+        val mysqlHost = System.getenv("MYSQL_HOST")
+        if (mysqlHost != null && mysqlHost.isNotEmpty()) {
+            logger.info("Attempting MySQL connection to: $mysqlHost:${System.getenv("MYSQL_PORT") ?: "3306"}")
+            try {
+                mysqlDataSource = initMySQL()
+                logger.info("✓ MySQL connection initialized successfully")
+            } catch (e: Exception) {
+                logger.warn("✗ Failed to initialize MySQL: ${e.message}", e)
+            }
+        } else {
+            logger.info("MySQL not configured (MYSQL_HOST not set)")
         }
 
-        try {
-            sqlServerDataSource = initSQLServer()
-            logger.info("SQL Server connection initialized")
-        } catch (e: Exception) {
-            logger.warn("Failed to initialize SQL Server: ${e.message}", e)
+        // SQL Server
+        val sqlHost = System.getenv("SQL_SERVER_HOST")
+        if (sqlHost != null && sqlHost.isNotEmpty()) {
+            logger.info("Attempting SQL Server connection to: $sqlHost:${System.getenv("SQLSERVER_PORT") ?: "1433"}")
+            try {
+                sqlServerDataSource = initSQLServer()
+                logger.info("✓ SQL Server connection initialized successfully")
+            } catch (e: Exception) {
+                logger.warn("✗ Failed to initialize SQL Server: ${e.message}", e)
+            }
+        } else {
+            logger.info("SQL Server not configured (SQL_SERVER_HOST not set)")
         }
 
-        try {
-            cosmosDataSource = initCosmosDB()
-            logger.info("CosmosDB connection initialized")
-        } catch (e: Exception) {
-            logger.warn("Failed to initialize CosmosDB: ${e.message}", e)
-        }
+        // CosmosDB (placeholder)
+        logger.info("CosmosDB integration prepared for SDK setup (not yet implemented)")
+        cosmosDataSource = initCosmosDB()
+
+        logger.info("=== DATABASE INITIALIZATION COMPLETE ===")
     }
 
     fun getPostgresDataSource(): DataSource? = pgDataSource
@@ -57,29 +78,33 @@ object DatabaseFactory {
         val postgresDb = System.getenv("POSTGRES_DB") ?: "appdb"
         val postgresUser = System.getenv("POSTGRES_USER") ?: "postgres"
 
+        logger.info("PostgreSQL config: host=$postgresHost, port=$postgresPort, db=$postgresDb, user=$postgresUser")
+
         val config = HikariConfig().apply {
             driverClassName = "org.postgresql.Driver"
             jdbcUrl = "jdbc:postgresql://$postgresHost:$postgresPort/$postgresDb"
             username = postgresUser
-            
+
             // Try managed identity first, then environment variable
             password = try {
                 if (System.getProperty("azure.credential.initialized") == "true") {
+                    logger.info("Attempting PostgreSQL connection with Azure Managed Identity")
                     getAzureTokenForPostgres()
                 } else {
+                    logger.info("Using PostgreSQL password from environment variable")
                     System.getenv("POSTGRES_PASSWORD") ?: ""
                 }
             } catch (e: Exception) {
-                logger.warn("Failed to get Azure token for PostgreSQL: ${e.message}", e)
+                logger.warn("Failed to get Azure token for PostgreSQL: ${e.message}, falling back to password", e)
                 System.getenv("POSTGRES_PASSWORD") ?: ""
             }
-            
+
             maximumPoolSize = 10
             minimumIdle = 2
         }
 
         return HikariDataSource(config).also {
-            logger.info("PostgreSQL connection pool initialized")
+            logger.info("PostgreSQL HikariCP pool created successfully")
         }
     }
 
@@ -88,6 +113,8 @@ object DatabaseFactory {
         val mysqlPort = System.getenv("MYSQL_PORT") ?: "3306"
         val mysqlDb = System.getenv("MYSQL_DB") ?: "appdb"
         val mysqlUser = System.getenv("MYSQL_USER") ?: "root"
+
+        logger.info("MySQL config: host=$mysqlHost, port=$mysqlPort, db=$mysqlDb, user=$mysqlUser")
 
         val config = HikariConfig().apply {
             driverClassName = "com.mysql.cj.jdbc.Driver"
@@ -99,7 +126,7 @@ object DatabaseFactory {
         }
 
         return HikariDataSource(config).also {
-            logger.info("MySQL connection pool initialized")
+            logger.info("MySQL HikariCP pool created successfully")
         }
     }
 
