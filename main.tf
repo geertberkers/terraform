@@ -79,7 +79,8 @@ module "app_service" {
 
 module "databases" {
   source = "./modules/databases"
-
+  sensitive = true
+  
   resource_group_name = "rg-terraform-databases-europe"
   location            = "swedencentral"
   env                 = "global"
