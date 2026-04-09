@@ -7,6 +7,8 @@ data "azurerm_linux_web_app" "app" {
 # PostgreSQL Managed Identity Access
 # ==========================================
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "postgres_admin" {
+  for_each = var.app_service_principal_id != null ? { "enabled" = true } : {}
+
   server_name         = azurerm_postgresql_flexible_server.postgres.name
   resource_group_name = var.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
@@ -14,7 +16,6 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "po
   principal_type      = "ServicePrincipal"
   principal_name      = "app-identity"
 }
-
 # ==========================================
 # MySQL Managed Identity Access
 # ==========================================
@@ -50,6 +51,8 @@ resource "null_resource" "sql_contained_user" {
 # Key Vault Access for Managed Identity
 # ==========================================
 resource "azurerm_key_vault_access_policy" "app_identity_kv" {
+  for_each = var.app_service_principal_id != null ? { "enabled" = true } : {}
+
   key_vault_id = azurerm_key_vault.kv.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
 

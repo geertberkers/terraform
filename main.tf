@@ -93,7 +93,7 @@ module "databases" {
   app_service_rg   = "rg-app-service-eu"
 
   # ✅ ADD THIS
-  app_service_principal_id = module.app_service.principal_id
+  app_service_principal_id = module.app_service.principal_id != "" ? module.app_service.principal_id : null
 }
 
 # =========================

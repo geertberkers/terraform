@@ -39,4 +39,5 @@ variable "app_service_rg" {
 variable "app_service_principal_id" {
   type        = string
   description = "Principal ID of the App Service managed identity"
+  default     = null
 }
