@@ -47,6 +47,10 @@ resource "azurerm_linux_web_app" "app" {
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
     "WEBSITES_PORT"                       = "8080"
 
+    # Docker deployment info
+    "DOCKER_IMAGE" = "ghcr.io/geertberkers/terraform/multi-db-backend"
+    "DOCKER_TAG"   = "latest"
+
     # Database connection settings
     "POSTGRES_HOST"   = var.postgres_fqdn
     "MYSQL_HOST"      = var.mysql_fqdn
