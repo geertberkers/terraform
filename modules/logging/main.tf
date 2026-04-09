@@ -1,5 +1,5 @@
 resource "azurerm_storage_account" "logging" {
-  name                     = "log${var.name_prefix}${random_string.suffix.result}"
+  name                     = "log-${var.name_prefix}${random_string.suffix.result}"
   resource_group_name      = var.resource_group_name
   location                 = var.location
   account_tier             = "Standard"

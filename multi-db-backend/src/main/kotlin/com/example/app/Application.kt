@@ -6,12 +6,10 @@ import com.example.app.logging.AzureFileLogger
 import com.example.app.logging.MultiLogger
 import com.example.app.logging.Logger
 import com.example.app.logging.ConsoleLogger
+import com.example.app.getAppLogger
+import com.example.app.setAppLogger
 
 private val consoleLogger = ConsoleLogger()
-private lateinit var appLogger: Logger
-
-// Export logger for other modules
-fun getAppLogger(): Logger = appLogger
 
 fun main() {
     // Initialize logger
@@ -26,7 +24,7 @@ fun main() {
 }
 
 fun Application.module() {
-    appLogger.info("Starting application...")
+    getAppLogger().info("Starting application...")
     
     // Initialize Azure authentication
     initializeAzureAuth()
@@ -40,7 +38,7 @@ fun Application.module() {
     configureFreemarker()
     configureRouting()
     
-    appLogger.info("Application started successfully")
+    getAppLogger().info("Application started successfully")
 }
 
 private fun initializeLogger() {
@@ -48,7 +46,7 @@ private fun initializeLogger() {
     val fileShare = System.getenv("AZURE_FILE_SHARE") ?: "logs"
     val logDirectory = System.getenv("AZURE_LOG_DIRECTORY") ?: "app-logs"
 
-    appLogger = if (storageAccount != null && storageAccount.isNotEmpty()) {
+    val logger = if (storageAccount != null && storageAccount.isNotEmpty()) {
         try {
             val azureLogger = AzureFileLogger(
                 shareName = fileShare,
@@ -57,11 +55,13 @@ private fun initializeLogger() {
             )
             MultiLogger(listOf(azureLogger))
         } catch (e: Exception) {
-            consoleLogger.warn("Failed to initialize Azure logger: ${e.message}, using console only")
+            consoleLogger.warn("Failed to initialize Azure logger: ${e.message}, using console only", e)
             ConsoleLogger()
         }
     } else {
         consoleLogger.warn("AZURE_STORAGE_ACCOUNT not set, using console logging only")
         ConsoleLogger()
     }
+    
+    setAppLogger(logger)
 }
