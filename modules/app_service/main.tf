@@ -58,11 +58,3 @@ resource "azurerm_linux_web_app" "app" {
     ]
   }
 }
-
-resource "azurerm_app_service_custom_hostname_binding" "custom_hostname" {
-  for_each = toset(var.custom_hostnames)
-
-  hostname            = each.value
-  app_service_name    = azurerm_linux_web_app.app.name
-  resource_group_name = azurerm_resource_group.app_rg.name
-}

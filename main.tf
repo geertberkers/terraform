@@ -75,7 +75,29 @@ module "app_service" {
   resource_group_name = "rg-terraform-app-service-westeurope"
   location            = "westeurope"
   name_prefix         = "my-web-service"
-  custom_hostnames    = ["azure.gb-coding.nl"]
+}
+
+resource "azurerm_dns_zone" "gb_coding" {
+  name                = var.dns_zone_name
+  resource_group_name = module.app_service.resource_group_name
+}
+
+resource "azurerm_dns_cname_record" "azure_subdomain" {
+  name                = var.dns_subdomain
+  zone_name           = azurerm_dns_zone.gb_coding.name
+  resource_group_name = azurerm_dns_zone.gb_coding.resource_group_name
+  ttl                 = 300
+  record              = module.app_service.default_hostname
+}
+
+resource "azurerm_app_service_custom_hostname_binding" "azure_domain" {
+  hostname            = var.custom_domain_name
+  app_service_name    = module.app_service.app_name
+  resource_group_name = module.app_service.resource_group_name
+
+  depends_on = [
+    azurerm_dns_cname_record.azure_subdomain
+  ]
 }
 
 module "databases" {
