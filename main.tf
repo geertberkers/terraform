@@ -68,7 +68,7 @@ module "sweden" {
 }
 
 # =========================
-# DATABASES
+# APP SERVICE
 # =========================
 module "app_service" {
   source              = "./modules/app_service"
@@ -77,29 +77,23 @@ module "app_service" {
   name_prefix         = "my-web-service"
 }
 
-resource "azurerm_dns_zone" "gb_coding" {
-  name                = var.dns_zone_name
+# =========================
+# DNS
+# =========================
+module "dns" {
+  source = "./modules/dns"
+
+  zone_name           = var.dns_zone_name
   resource_group_name = module.app_service.resource_group_name
-}
-
-resource "azurerm_dns_cname_record" "azure_subdomain" {
-  name                = var.dns_subdomain
-  zone_name           = azurerm_dns_zone.gb_coding.name
-  resource_group_name = azurerm_dns_zone.gb_coding.resource_group_name
-  ttl                 = 300
-  record              = module.app_service.default_hostname
-}
-
-resource "azurerm_app_service_custom_hostname_binding" "azure_domain" {
-  hostname            = var.custom_domain_name
+  subdomain_name      = var.dns_subdomain
+  custom_domain_name  = var.custom_domain_name
+  app_hostname        = module.app_service.default_hostname
   app_service_name    = module.app_service.app_name
-  resource_group_name = module.app_service.resource_group_name
-
-  depends_on = [
-    azurerm_dns_cname_record.azure_subdomain
-  ]
 }
 
+# =========================
+# DATABASES
+# =========================
 module "databases" {
   source = "./modules/databases"
 
