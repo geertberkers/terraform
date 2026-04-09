@@ -65,13 +65,13 @@ jobs:
       - name: Import Databases
         run: |
           terraform import module.databases.azurerm_cosmosdb_account.cosmos \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-databases-europe/providers/Microsoft.DocumentDB/databaseAccounts/cosmos-global
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-databases-europe/providers/Microsoft.DocumentDB/databaseAccounts/cosmos-global
 
           terraform import module.databases.azurerm_mysql_flexible_server.mysql \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-databases-europe/providers/Microsoft.DBforMySQL/flexibleServers/mysql-global
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-databases-europe/providers/Microsoft.DBforMySQL/flexibleServers/mysql-global
 
           terraform import module.databases.azurerm_postgresql_flexible_server.postgres \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-databases-europe/providers/Microsoft.DBforPostgreSQL/flexibleServers/pg-global
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-databases-europe/providers/Microsoft.DBforPostgreSQL/flexibleServers/pg-global
 
       # =========================
       # IMPORT RESOURCE GROUPS
@@ -80,10 +80,10 @@ jobs:
         run: |
 
           terraform import module.switzerland.azurerm_resource_group.rg \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-switzerland-north || true
 
           terraform import module.sweden.azurerm_resource_group.rg \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-sweden-central || true
 
       # =========================
       # IMPORT VNets
@@ -91,10 +91,10 @@ jobs:
       - name: Import VNets
         run: |
           terraform import module.switzerland.azurerm_virtual_network.vnet \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/virtualNetworks/vnet-ch || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-switzerland-north/providers/Microsoft.Network/virtualNetworks/vnet-ch || true
 
           terraform import module.sweden.azurerm_virtual_network.vnet \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/virtualNetworks/vnet-se || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-sweden-central/providers/Microsoft.Network/virtualNetworks/vnet-se || true
 
       # =========================
       # IMPORT SUBNETS
@@ -102,10 +102,10 @@ jobs:
       - name: Import Subnets
         run: |
           terraform import module.switzerland.azurerm_subnet.subnet \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/virtualNetworks/vnet-ch/subnets/subnet-ch || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-switzerland-north/providers/Microsoft.Network/virtualNetworks/vnet-ch/subnets/subnet-ch || true
 
           terraform import module.sweden.azurerm_subnet.subnet \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/virtualNetworks/vnet-se/subnets/subnet-se || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-sweden-central/providers/Microsoft.Network/virtualNetworks/vnet-se/subnets/subnet-se || true
 
       # =========================
       # IMPORT NETWORK INTERFACES
@@ -113,16 +113,16 @@ jobs:
       - name: Import NICs
         run: |
           terraform import module.switzerland.azurerm_network_interface.nic[0] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/networkInterfaces/nic-ch-0 || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-switzerland-north/providers/Microsoft.Network/networkInterfaces/nic-ch-0 || true
 
           terraform import module.switzerland.azurerm_network_interface.nic[1] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/networkInterfaces/nic-ch-1 || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-switzerland-north/providers/Microsoft.Network/networkInterfaces/nic-ch-1 || true
 
           terraform import module.sweden.azurerm_network_interface.nic[0] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/networkInterfaces/nic-se-0 || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-sweden-central/providers/Microsoft.Network/networkInterfaces/nic-se-0 || true
 
           terraform import module.sweden.azurerm_network_interface.nic[1] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/networkInterfaces/nic-se-1 || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-sweden-central/providers/Microsoft.Network/networkInterfaces/nic-se-1 || true
 
       # =========================
       # IMPORT PUBLIC IPs
@@ -130,16 +130,16 @@ jobs:
       - name: Import Public IPs
         run: |
           terraform import module.switzerland.azurerm_public_ip.ip[0] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/publicIPAddresses/ip-ch-0 || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-switzerland-north/providers/Microsoft.Network/publicIPAddresses/ip-ch-0 || true
 
           terraform import module.switzerland.azurerm_public_ip.ip[1] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Network/publicIPAddresses/ip-ch-1 || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-switzerland-north/providers/Microsoft.Network/publicIPAddresses/ip-ch-1 || true
 
           terraform import module.sweden.azurerm_public_ip.ip[0] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/publicIPAddresses/ip-se-0 || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-sweden-central/providers/Microsoft.Network/publicIPAddresses/ip-se-0 || true
 
           terraform import module.sweden.azurerm_public_ip.ip[1] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Network/publicIPAddresses/ip-se-1 || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-sweden-central/providers/Microsoft.Network/publicIPAddresses/ip-se-1 || true
 
       # =========================
       # IMPORT VIRTUAL MACHINES
@@ -147,16 +147,16 @@ jobs:
       - name: Import Virtual Machines
         run: |
           terraform import module.switzerland.azurerm_linux_virtual_machine.vm[0] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Compute/virtualMachines/vm-ch-0 || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-switzerland-north/providers/Microsoft.Compute/virtualMachines/vm-ch-0 || true
 
           terraform import module.switzerland.azurerm_linux_virtual_machine.vm[1] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-switzerland-north/providers/Microsoft.Compute/virtualMachines/vm-ch-1 || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-switzerland-north/providers/Microsoft.Compute/virtualMachines/vm-ch-1 || true
 
           terraform import module.sweden.azurerm_linux_virtual_machine.vm[0] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Compute/virtualMachines/vm-se-0 || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-sweden-central/providers/Microsoft.Compute/virtualMachines/vm-se-0 || true
 
           terraform import module.sweden.azurerm_linux_virtual_machine.vm[1] \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-sweden-central/providers/Microsoft.Compute/virtualMachines/vm-se-1 || true
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-sweden-central/providers/Microsoft.Compute/virtualMachines/vm-se-1 || true
 
       # =========================
       # FINAL CHECK
