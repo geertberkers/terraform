@@ -5,7 +5,7 @@ resource "random_id" "kv_suffix" {
 }
 
 resource "azurerm_key_vault" "kv" {
-  name                = "kv-db-${var.env}-${random_id.kv_suffix.hex}"
+  name                = "kv-db-${var.env}-${random_id.kv_suffix.hex}-new"
   location            = azurerm_resource_group.db_rg.location
   resource_group_name = azurerm_resource_group.db_rg.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
