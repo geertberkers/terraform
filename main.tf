@@ -92,7 +92,7 @@ module "databases" {
   app_service_name = module.app_service.app_name
   app_service_rg   = "rg-app-service-eu"
 
-   # ✅ ADD THIS
+  # ✅ ADD THIS
   app_service_principal_id = module.app_service.principal_id
 }
 
