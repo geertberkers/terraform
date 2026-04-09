@@ -135,19 +135,20 @@ object DatabaseFactory {
         val sqlPort = System.getenv("SQLSERVER_PORT")?.toInt() ?: 1433
         val sqlDb = System.getenv("SQLSERVER_DB") ?: "master"
         val sqlUser = System.getenv("SQLSERVER_USER") ?: "sa"
-        val sqlPassword = System.getenv("SQLSERVER_PASSWORD") ?: ""
+
+        logger.info("SQL Server config: host=$sqlHost, port=$sqlPort, db=$sqlDb, user=$sqlUser")
 
         val config = HikariConfig().apply {
             driverClassName = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
             jdbcUrl = "jdbc:sqlserver://$sqlHost:$sqlPort;database=$sqlDb;encrypt=true;trustServerCertificate=false"
             username = sqlUser
-            password = sqlPassword
+            password = System.getenv("SQLSERVER_PASSWORD") ?: ""
             maximumPoolSize = 10
             minimumIdle = 2
         }
 
         return HikariDataSource(config).also {
-            logger.info("SQL Server connection pool initialized")
+            logger.info("SQL Server HikariCP pool created successfully")
         }
     }
 
