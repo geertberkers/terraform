@@ -19,10 +19,12 @@ fun initializeAzureAuth() {
 
 fun initializeDatabases() {
     try {
+        logger.info("Calling DatabaseFactory.init()...")
         DatabaseFactory.init()
-        logger.info { "Database connections initialized" }
+        logger.info("Database connections initialized successfully")
     } catch (e: Exception) {
-        logger.error("Failed to initialize databases", e)
-        throw e
+        logger.error("Failed to initialize databases - this will not prevent application startup", e)
+        // Do NOT re-throw the exception - allow application to continue
+        logger.warn("Application will continue without database connectivity")
     }
 }
