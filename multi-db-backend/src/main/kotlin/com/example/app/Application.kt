@@ -12,8 +12,18 @@ import com.example.app.setAppLogger
 private val consoleLogger = ConsoleLogger()
 
 fun main() {
-    // Initialize logger
-    initializeLogger()
+    println("Starting Kotlin application...")
+
+    // Initialize logger first - this is critical
+    try {
+        initializeLogger()
+        getAppLogger().info("Logger initialized successfully")
+    } catch (e: Exception) {
+        consoleLogger.error("CRITICAL: Failed to initialize logger, using console fallback", e)
+        setAppLogger(consoleLogger)
+    }
+
+    getAppLogger().info("Starting embedded server on port ${System.getenv("PORT")?.toInt() ?: 8080}")
 
     embeddedServer(
         factory = Netty,
@@ -24,21 +34,53 @@ fun main() {
 }
 
 fun Application.module() {
-    getAppLogger().info("Starting application...")
-    
-    // Initialize Azure authentication
-    initializeAzureAuth()
-    
-    // Initialize database connections
-    initializeDatabases()
-    
-    // Install plugins
-    configureSerialization()
-    configureStatusPages()
-    configureFreemarker()
-    configureRouting()
-    
-    getAppLogger().info("Application started successfully")
+    val logger = getAppLogger()
+    logger.info("=== APPLICATION STARTUP BEGIN ===")
+    logger.info("Environment: PORT=${System.getenv("PORT")}, HOST=0.0.0.0")
+    logger.info("Docker Image: ${System.getenv("DOCKER_IMAGE") ?: "not set"}")
+    logger.info("Docker Tag: ${System.getenv("DOCKER_TAG") ?: "not set"}")
+
+    // Initialize Azure authentication - non-critical
+    try {
+        logger.info("Initializing Azure authentication...")
+        initializeAzureAuth()
+        logger.info("✓ Azure authentication initialized successfully")
+    } catch (e: Exception) {
+        logger.warn("✗ Azure authentication failed, continuing without it", e)
+    }
+
+    // Initialize database connections - non-critical for startup
+    try {
+        logger.info("Initializing database connections...")
+        initializeDatabases()
+        logger.info("✓ Database connections initialized successfully")
+    } catch (e: Exception) {
+        logger.error("✗ Database initialization failed, application will continue without database connectivity", e)
+    }
+
+    // Install plugins - these are critical
+    try {
+        logger.info("Installing Ktor plugins...")
+        configureSerialization()
+        logger.info("✓ Serialization plugin configured")
+
+        configureStatusPages()
+        logger.info("✓ Status pages plugin configured")
+
+        configureFreemarker()
+        logger.info("✓ Freemarker plugin configured")
+
+        configureRouting()
+        logger.info("✓ Routing plugin configured")
+
+        logger.info("✓ All plugins installed successfully")
+    } catch (e: Exception) {
+        logger.error("CRITICAL: Failed to install plugins, application may not function properly", e)
+        throw e // This is critical, re-throw
+    }
+
+    logger.info("=== APPLICATION STARTUP COMPLETE ===")
+    logger.info("Server is ready to accept connections")
 }
 
 private fun initializeLogger() {
