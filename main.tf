@@ -75,6 +75,7 @@ module "app_service" {
   resource_group_name = "rg-terraform-app-service-westeurope"
   location            = "westeurope"
   name_prefix         = "my-web-service"
+  custom_hostnames    = ["azure.gb-coding.nl"]
 }
 
 module "databases" {

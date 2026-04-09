@@ -12,3 +12,9 @@ variable "name_prefix" {
   type        = string
   description = "Prefix for the App Service names"
 }
+
+variable "custom_hostnames" {
+  type        = list(string)
+  description = "Optional custom hostnames to bind to the App Service"
+  default     = []
+}
