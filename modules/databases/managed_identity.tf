@@ -65,6 +65,8 @@ resource "azurerm_key_vault_access_policy" "app_identity_kv" {
 }
 
 resource "azurerm_role_assignment" "app_kv_secrets_user" {
+  for_each = var.app_service_principal_id != null ? { "enabled" = true } : {}
+
   scope                = azurerm_key_vault.kv.id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = var.app_service_principal_id
