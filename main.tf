@@ -102,8 +102,8 @@ module "databases" {
   app_service_rg   = "rg-app-service-eu"
 
   # Using stable identity IDs from the identity module
-  app_service_principal_id = module.identity.principal_id
-  app_service_client_id    = module.identity.client_id
+  app_service_principal_id  = module.identity.principal_id
+  app_service_client_id     = module.identity.client_id
   app_service_identity_name = module.identity.name
 }
 
