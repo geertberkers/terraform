@@ -12,3 +12,8 @@ variable "name_prefix" {
   type        = string
   description = "Prefix for the App Service names"
 }
+
+variable "identity_id" {
+  type        = string
+  description = "User Assigned Identity ID"
+}

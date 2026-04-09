@@ -62,13 +62,22 @@ module "sweden" {
 }
 
 # =========================
-# APP SERVICE (SYSTEM ASSIGNED IDENTITY)
+# IDENTITY
+# =========================
+module "identity" {
+  source   = "./modules/identity"
+  location = "westeurope"
+}
+
+# =========================
+# APP SERVICE (USER ASSIGNED IDENTITY)
 # =========================
 module "app_service" {
   source              = "./modules/app_service"
   resource_group_name = "rg-app-service-eu"
   location            = "westeurope"
   name_prefix         = "my-web-service"
+  identity_id         = module.identity.id
 }
 
 # =========================
@@ -92,8 +101,10 @@ module "databases" {
   app_service_name = module.app_service.app_name
   app_service_rg   = "rg-app-service-eu"
 
-  # ✅ ADD THIS
-  app_service_principal_id = module.app_service.principal_id != "" ? module.app_service.principal_id : null
+  # Using stable identity IDs from the identity module
+  app_service_principal_id = module.identity.principal_id
+  app_service_client_id    = module.identity.client_id
+  app_service_identity_name = module.identity.name
 }
 
 # =========================

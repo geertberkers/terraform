@@ -41,3 +41,15 @@ variable "app_service_principal_id" {
   description = "Principal ID of the App Service managed identity"
   default     = null
 }
+
+variable "app_service_client_id" {
+  type        = string
+  description = "Client ID of the App Service managed identity"
+  default     = null
+}
+
+variable "app_service_identity_name" {
+  type        = string
+  description = "Name of the User Assigned Identity"
+  default     = null
+}
