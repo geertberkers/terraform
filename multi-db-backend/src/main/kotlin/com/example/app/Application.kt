@@ -10,6 +10,9 @@ import mu.KotlinLogging
 private val consoleLogger = KotlinLogging.logger {}
 private lateinit var appLogger: Logger
 
+// Export logger for other modules
+fun getAppLogger(): Logger = appLogger
+
 fun main() {
     // Initialize logger
     initializeLogger()
