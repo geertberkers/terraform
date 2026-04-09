@@ -4,10 +4,8 @@ import com.azure.core.credential.TokenRequestContext
 import com.azure.identity.DefaultAzureCredentialBuilder
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import mu.KotlinLogging
+import com.example.app.appLogger
 import javax.sql.DataSource
-
-private val logger = KotlinLogging.logger {}
 
 object DatabaseFactory {
     private var pgDataSource: DataSource? = null
@@ -18,30 +16,30 @@ object DatabaseFactory {
     fun init() {
         try {
             pgDataSource = initPostgres()
-            logger.info { "PostgreSQL connection initialized" }
+            appLogger.info("PostgreSQL connection initialized")
         } catch (e: Exception) {
-            logger.warn { "Failed to initialize PostgreSQL: ${e.message}" }
+            appLogger.warn("Failed to initialize PostgreSQL: ${e.message}")
         }
 
         try {
             mysqlDataSource = initMySQL()
-            logger.info { "MySQL connection initialized" }
+            appLogger.info("MySQL connection initialized")
         } catch (e: Exception) {
-            logger.warn { "Failed to initialize MySQL: ${e.message}" }
+            appLogger.warn("Failed to initialize MySQL: ${e.message}")
         }
 
         try {
             sqlServerDataSource = initSQLServer()
-            logger.info { "SQL Server connection initialized" }
+            appLogger.info("SQL Server connection initialized")
         } catch (e: Exception) {
-            logger.warn { "Failed to initialize SQL Server: ${e.message}" }
+            appLogger.warn("Failed to initialize SQL Server: ${e.message}")
         }
 
         try {
             cosmosDataSource = initCosmosDB()
-            logger.info { "CosmosDB connection initialized" }
+            appLogger.info("CosmosDB connection initialized")
         } catch (e: Exception) {
-            logger.warn { "Failed to initialize CosmosDB: ${e.message}" }
+            appLogger.warn("Failed to initialize CosmosDB: ${e.message}")
         }
     }
 
@@ -69,7 +67,7 @@ object DatabaseFactory {
                     System.getenv("POSTGRES_PASSWORD") ?: ""
                 }
             } catch (e: Exception) {
-                logger.warn { "Failed to get Azure token for PostgreSQL: ${e.message}" }
+                appLogger.warn("Failed to get Azure token for PostgreSQL: ${e.message}")
                 System.getenv("POSTGRES_PASSWORD") ?: ""
             }
             
@@ -78,7 +76,7 @@ object DatabaseFactory {
         }
 
         return HikariDataSource(config).also {
-            logger.info { "PostgreSQL connection pool initialized" }
+            appLogger.info("PostgreSQL connection pool initialized")
         }
     }
 
@@ -98,12 +96,12 @@ object DatabaseFactory {
         }
 
         return HikariDataSource(config).also {
-            logger.info { "MySQL connection pool initialized" }
+            appLogger.info("MySQL connection pool initialized")
         }
     }
 
     private fun initSQLServer(): DataSource {
-        val sqlHost = System.getenv("SQLSERVER_HOST") ?: "localhost"
+        val sqlHost = System.getenv("SQL_SERVER_HOST") ?: "localhost"
         val sqlPort = System.getenv("SQLSERVER_PORT")?.toInt() ?: 1433
         val sqlDb = System.getenv("SQLSERVER_DB") ?: "master"
         val sqlUser = System.getenv("SQLSERVER_USER") ?: "sa"
@@ -119,14 +117,14 @@ object DatabaseFactory {
         }
 
         return HikariDataSource(config).also {
-            logger.info { "SQL Server connection pool initialized" }
+            appLogger.info("SQL Server connection pool initialized")
         }
     }
 
     private fun initCosmosDB(): DataSource? {
         // CosmosDB typically uses SDK, not JDBC
         // This is a placeholder for future SDK integration
-        logger.info { "CosmosDB integration prepared for SDK setup" }
+        appLogger.info("CosmosDB integration prepared for SDK setup")
         return null
     }
 
@@ -140,7 +138,7 @@ object DatabaseFactory {
 
             token?.token ?: throw IllegalStateException("Azure token retrieval returned null")
         } catch (e: Exception) {
-            logger.error("Failed to get Azure token", e)
+            appLogger.error("Failed to get Azure token", e)
             throw e
         }
     }

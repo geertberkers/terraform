@@ -46,6 +46,9 @@ dependencies {
     implementation("com.azure:azure-identity:1.11.4")
     implementation("com.azure.resourcemanager:azure-resourcemanager:2.38.0")
 
+    // Azure Storage for logging
+    implementation("com.azure:azure-storage-file-share:12.20.0")
+
     // Configuration
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 

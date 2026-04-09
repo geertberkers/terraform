@@ -75,6 +75,26 @@ module "app_service" {
   resource_group_name = "rg-terraform-app-service-westeurope"
   location            = "westeurope"
   name_prefix         = "my-web-service"
+
+  postgres_fqdn   = module.databases.postgres_fqdn
+  mysql_fqdn      = module.databases.mysql_fqdn
+  sql_server_fqdn = module.databases.sql_server_fqdn
+  cosmos_endpoint = module.databases.cosmos_endpoint
+
+  azure_storage_account = module.logging.storage_account_name
+  azure_file_share      = module.logging.file_share_name
+}
+
+# =========================
+# LOGGING
+# =========================
+module "logging" {
+  source = "./modules/logging"
+
+  resource_group_name       = module.app_service.resource_group_name
+  location                  = "westeurope"
+  name_prefix               = "app"
+  app_identity_principal_id = module.app_service.app_identity_principal_id
 }
 
 # =========================
