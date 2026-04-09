@@ -31,7 +31,7 @@ provider "azurerm" {
 module "switzerland" {
   source = "./modules/region"
 
-  resource_group_name = "rg-switzerland-north"
+  resource_group_name = "rg-terraform-switzerland-north"
   location            = "switzerlandnorth"
   prefix              = "ch"
 
@@ -52,7 +52,7 @@ module "switzerland" {
 module "sweden" {
   source = "./modules/region"
 
-  resource_group_name = "rg-sweden-central"
+  resource_group_name = "rg-terraform-sweden-central"
   location            = "swedencentral"
   prefix              = "se"
 
@@ -68,11 +68,11 @@ module "sweden" {
 }
 
 # =========================
-# DATABASES - Rollback
+# DATABASES
 # =========================
 module "app_service" {
   source              = "./modules/app_service"
-  resource_group_name = "rg-app-service-eu"
+  resource_group_name = "rg-terraform-app-service-westeurope"
   location            = "westeurope"
   name_prefix         = "my-web-service"
 }
@@ -80,7 +80,7 @@ module "app_service" {
 module "databases" {
   source = "./modules/databases"
 
-  resource_group_name = "rg-databases-europe"
+  resource_group_name = "rg-terraform-databases-europe"
   location            = "swedencentral"
   env                 = "global"
 
@@ -101,21 +101,21 @@ module "databases" {
 
 # module "my_app_service" {
 #   source              = "./modules/app_service"
-#   resource_group_name = "rg-app-service-eu"
+#   resource_group_name = "rg-terraform-app-service-eu"
 #   location            = "swedencentral"
 #   name_prefix         = "mywebapp"
 # }
 
 # module "my_container_apps" {
 #   source              = "./modules/container_apps"
-#   resource_group_name = "rg-ca-eu"
+#   resource_group_name = "rg-terraform-ca-eu"
 #   location            = "swedencentral"
 #   name_prefix         = "myca"
 # }
 
 # module "my_aks" {
 #   source              = "./modules/aks"
-#   resource_group_name = "rg-aks-eu"
+#   resource_group_name = "rg-terraform-aks-eu"
 #   location            = "swedencentral"
 #   name_prefix         = "myk8s"
 # }
