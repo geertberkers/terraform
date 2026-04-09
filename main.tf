@@ -68,7 +68,7 @@ module "sweden" {
 }
 
 # =========================
-# DATABASES
+# DATABASES - Rollback
 # =========================
 module "app_service" {
   source              = "./modules/app_service"
