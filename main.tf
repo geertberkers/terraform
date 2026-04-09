@@ -11,11 +11,17 @@ terraform {
       version = "~> 3.0"
     }
   }
+
+  # Backend stays in backend.tf
 }
 
+# =========================
+# AZURE PROVIDER (FIXED)
+# =========================
 provider "azurerm" {
   features {}
 
+  # 🔥 REQUIRED for GitHub OIDC authentication
   use_oidc = true
 }
 
@@ -62,31 +68,17 @@ module "sweden" {
 }
 
 # =========================
-# IDENTITY
-# =========================
-module "identity" {
-  source   = "./modules/identity"
-  location = "westeurope"
-}
-
-# =========================
-# APP SERVICE (USER ASSIGNED IDENTITY)
+# DATABASES - Rollback
 # =========================
 module "app_service" {
   source              = "./modules/app_service"
   resource_group_name = "rg-app-service-eu"
   location            = "westeurope"
   name_prefix         = "my-web-service"
-  identity_id         = module.identity.id
 }
 
-# =========================
-# DATABASES
-# =========================
 module "databases" {
   source = "./modules/databases"
-
-  depends_on = [module.app_service]
 
   resource_group_name = "rg-databases-europe"
   location            = "swedencentral"
@@ -96,16 +88,9 @@ module "databases" {
   sql_admin_user   = var.sql_admin_user
   pg_admin_user    = var.pg_admin_user
 
+  app_identity_principal_id = module.app_service.app_identity_principal_id
+
   sql_database_name = var.sql_database_name
-
-  app_service_name = module.app_service.app_name
-  app_service_rg   = "rg-app-service-eu"
-
-  # Using stable identity IDs from the identity module
-  app_service_principal_id  = module.identity.principal_id
-  app_service_client_id     = module.identity.client_id
-  app_service_identity_name = module.identity.name
-  enable_app_identity       = true
 }
 
 # =========================

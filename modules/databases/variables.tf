@@ -26,36 +26,8 @@ variable "sql_database_name" {
   type = string
 }
 
-variable "app_service_name" {
+variable "app_identity_principal_id" {
   type        = string
-  description = "Name of the App Service to read identity from"
-}
-
-variable "app_service_rg" {
-  type        = string
-  description = "Resource group of the App Service"
-}
-
-variable "app_service_principal_id" {
-  type        = string
-  description = "Principal ID of the App Service managed identity"
-  default     = null
-}
-
-variable "app_service_client_id" {
-  type        = string
-  description = "Client ID of the App Service managed identity"
-  default     = null
-}
-
-variable "app_service_identity_name" {
-  type        = string
-  description = "Name of the User Assigned Identity"
-  default     = null
-}
-
-variable "enable_app_identity" {
-  type        = bool
-  description = "Enable Managed Identity access for the App Service"
-  default     = false
+  description = "Principal ID of the managed identity for database access"
+  default     = ""
 }

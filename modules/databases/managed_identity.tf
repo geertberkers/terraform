@@ -1,21 +1,15 @@
-data "azurerm_linux_web_app" "app" {
-  name                = var.app_service_name
-  resource_group_name = var.app_service_rg
-}
-
 # ==========================================
 # PostgreSQL Managed Identity Access
 # ==========================================
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "postgres_admin" {
-  for_each = var.enable_app_identity ? { "enabled" = true } : {}
-
   server_name         = azurerm_postgresql_flexible_server.postgres.name
   resource_group_name = var.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = var.app_service_principal_id
+  object_id           = var.app_identity_principal_id
   principal_type      = "ServicePrincipal"
-  principal_name      = var.app_service_identity_name
+  principal_name      = "app-identity"
 }
+
 # ==========================================
 # MySQL Managed Identity Access
 # ==========================================
@@ -30,7 +24,8 @@ resource "azurerm_mssql_server_microsoft_support_auditing_policy" "sql_audit" {
   enabled   = true
 }
 
-# Create contained user for SQL Server (manual bootstrap via sqlcmd)
+# Create contained users for SQL Server via Terraform
+# (Note: This requires using sql_admin credentials initially or a custom provider)
 resource "null_resource" "sql_contained_user" {
   depends_on = [
     azurerm_mssql_database.db
@@ -47,22 +42,17 @@ resource "null_resource" "sql_contained_user" {
   }
 }
 
+
+
 # ==========================================
-# Key Vault Access for Managed Identity
+# Key Vault Access for the Managed Identity
 # ==========================================
 resource "azurerm_key_vault_access_policy" "app_identity_kv" {
-  for_each = var.enable_app_identity ? { "enabled" = true } : {}
-
   key_vault_id = azurerm_key_vault.kv.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
-
-  object_id = var.app_service_principal_id
+  object_id    = var.app_identity_principal_id
 
   secret_permissions = [
-    "Get",
-    "List"
+    "Get", "List"
   ]
 }
-
-# Using Access Policies above instead of RBAC Role Assignments 
-# to avoid 400 InsufficientPermissions errors.
