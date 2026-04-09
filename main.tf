@@ -83,6 +83,7 @@ module "app_service" {
 
   azure_storage_account = module.logging.storage_account_name
   azure_file_share      = module.logging.file_share_name
+  azure_storage_key     = module.logging.storage_account_primary_access_key
 }
 
 # =========================
@@ -91,10 +92,9 @@ module "app_service" {
 module "logging" {
   source = "./modules/logging"
 
-  resource_group_name       = module.app_service.resource_group_name
-  location                  = "westeurope"
-  name_prefix               = "app"
-  app_identity_principal_id = module.app_service.app_identity_principal_id
+  resource_group_name = module.app_service.resource_group_name
+  location            = "westeurope"
+  name_prefix         = "app"
 }
 
 # =========================

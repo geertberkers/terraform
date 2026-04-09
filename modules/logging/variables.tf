@@ -24,8 +24,4 @@ variable "file_share_quota" {
   description = "Quota for the file share in GB"
   default     = 50
 }
-
-variable "app_identity_principal_id" {
-  type        = string
-  description = "Principal ID of the app service managed identity"
 }

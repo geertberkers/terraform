@@ -89,15 +89,17 @@ private fun initializeLogger() {
     val storageAccount = System.getenv("AZURE_STORAGE_ACCOUNT")
     val fileShare = System.getenv("AZURE_FILE_SHARE") ?: "logs"
     val logDirectory = System.getenv("AZURE_LOG_DIRECTORY") ?: "app-logs"
+    val storageKey = System.getenv("AZURE_STORAGE_KEY")
 
     val logger = if (storageAccount != null && storageAccount.isNotEmpty()) {
         try {
             val azureLogger = AzureFileLogger(
                 shareName = fileShare,
                 directoryName = logDirectory,
-                accountName = storageAccount
+                accountName = storageAccount,
+                accountKey = storageKey
             )
-            MultiLogger(listOf(azureLogger))
+            MultiLogger(listOf(ConsoleLogger(), azureLogger))
         } catch (e: Exception) {
             consoleLogger.warn("Failed to initialize Azure logger: ${e.message}, using console only", e)
             ConsoleLogger()
@@ -106,6 +108,6 @@ private fun initializeLogger() {
         consoleLogger.warn("AZURE_STORAGE_ACCOUNT not set, using console logging only")
         ConsoleLogger()
     }
-    
+
     setAppLogger(logger)
 }

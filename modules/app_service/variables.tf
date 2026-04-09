@@ -54,3 +54,10 @@ variable "azure_log_directory" {
   description = "Directory in file share for logs"
   default     = "app-logs"
 }
+
+variable "azure_storage_key" {
+  type        = string
+  description = "Azure Storage account access key for logging"
+  default     = ""
+  sensitive   = true
+}

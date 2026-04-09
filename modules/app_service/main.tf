@@ -57,13 +57,14 @@ resource "azurerm_linux_web_app" "app" {
     "SQL_SERVER_HOST" = var.sql_server_fqdn
     "COSMOS_ENDPOINT" = var.cosmos_endpoint
 
-    # Use managed identity for authentication
+    # Use managed identity for authentication (for databases, not logging)
     "AZURE_CLIENT_ID" = azurerm_user_assigned_identity.app_identity.client_id
 
-    # Azure Storage for logging
-    "AZURE_STORAGE_ACCOUNT" = var.azure_storage_account
-    "AZURE_FILE_SHARE"      = var.azure_file_share
-    "AZURE_LOG_DIRECTORY"   = var.azure_log_directory
+    # Azure Storage for logging (using access key instead of managed identity)
+    "AZURE_STORAGE_ACCOUNT"   = var.azure_storage_account
+    "AZURE_FILE_SHARE"        = var.azure_file_share
+    "AZURE_LOG_DIRECTORY"     = var.azure_log_directory
+    "AZURE_STORAGE_KEY"       = var.azure_storage_key
   }
 
   depends_on = [
