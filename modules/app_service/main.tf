@@ -51,4 +51,10 @@ resource "azurerm_linux_web_app" "app" {
   depends_on = [
     azurerm_service_plan.asp
   ]
+
+  lifecycle {
+    ignore_changes = [
+      site_config[0].application_stack[0].docker_image_tag
+    ]
+  }
 }
