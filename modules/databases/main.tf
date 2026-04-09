@@ -6,3 +6,4 @@ resource "azurerm_resource_group" "db_rg" {
 }
 
 data "azurerm_subscription" "current" {}
+data "azurerm_client_config" "current" {}
