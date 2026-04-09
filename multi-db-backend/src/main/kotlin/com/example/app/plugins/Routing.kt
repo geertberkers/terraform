@@ -34,15 +34,15 @@ fun Application.configureRouting() {
                         <h1>🚀 Multi-Database Backend</h1>
                         <div class="info">
                             <div class="label">Docker Image:</div>
-                            <div class="value">${'$'}dockerImage</div>
+                            <div class="value">$dockerImage</div>
                         </div>
                         <div class="info">
                             <div class="label">Docker Tag:</div>
-                            <div class="value">${'$'}dockerTag</div>
+                            <div class="value">$dockerTag</div>
                         </div>
                         <div class="info">
                             <div class="label">Started at:</div>
-                            <div class="value">${'$'}timestamp</div>
+                            <div class="value">$timestamp</div>
                         </div>
                         <hr>
                         <p><a href="/health">Health Check</a> | <a href="/dashboard">Dashboard</a></p>
