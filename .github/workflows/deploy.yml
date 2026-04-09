@@ -29,12 +29,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set lower case image name
-        run: |
-          echo "IMAGE_NAME_LOWER=${IMAGE_NAME,,}" >> $GITHUB_ENV
-        env:
-          IMAGE_NAME: ${{ env.REGISTRY }}/${{ github.repository }}/multi-db-backend
-
       - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
@@ -68,12 +62,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set lower case image name
-        run: |
-          echo "IMAGE_NAME_LOWER=${IMAGE_NAME,,}" >> $GITHUB_ENV
-        env:
-          IMAGE_NAME: ${{ env.REGISTRY }}/${{ github.repository }}/multi-db-backend
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -88,7 +76,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.IMAGE_NAME_LOWER }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=sha
             type=raw,value=${{ github.sha }}
@@ -109,12 +97,6 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Set lower case image name
-        run: |
-          echo "IMAGE_NAME_LOWER=${IMAGE_NAME,,}" >> $GITHUB_ENV
-        env:
-          IMAGE_NAME: ${{ env.REGISTRY }}/${{ github.repository }}/multi-db-backend
-
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -128,7 +110,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          images: ${{ env.IMAGE_NAME_LOWER }}:${{ github.sha }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
       - name: Azure Logout
         run: az logout
