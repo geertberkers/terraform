@@ -81,11 +81,17 @@ jobs:
       # =========================
       # Install SQL tools (separate step)
       # =========================
-      - name: Install SQL tools
+      - name: Install SQL tools (if needed)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          sudo apt-get update -y
-          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
+          if command -v sqlcmd >/dev/null 2>&1; then
+            echo "sqlcmd already installed, skipping..."
+          else
+            echo "sqlcmd not found, installing mssql-tools18..."
+            sudo apt-get update -y
+            sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
+          fi
+
           echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
 
       # =========================
