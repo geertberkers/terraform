@@ -17,3 +17,13 @@ output "custom_domain_binding_id" {
   value       = azurerm_app_service_custom_hostname_binding.custom_domain.id
   description = "The ID of the custom hostname binding"
 }
+
+output "managed_certificate_id" {
+  value       = azurerm_app_service_managed_certificate.managed_cert.id
+  description = "The ID of the Azure Managed Certificate"
+}
+
+output "certificate_binding_id" {
+  value       = azurerm_app_service_certificate_binding.cert_binding.id
+  description = "The ID of the SSL certificate binding"
+}

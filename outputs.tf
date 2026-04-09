@@ -17,3 +17,11 @@ output "app_hostname" {
 output "custom_domain_fqdn" {
   value = module.dns.cname_fqdn
 }
+
+output "ssl_certificate_binding_id" {
+  value = module.dns.certificate_binding_id
+}
+
+output "managed_certificate_id" {
+  value = module.dns.managed_certificate_id
+}
