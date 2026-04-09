@@ -50,8 +50,6 @@ jobs:
       - name: Terraform Init
         run: terraform init -reconfigure -input=false -lock-timeout=10m
 
-
-        ///
       # =========================
       # IMPORT Hostname Binding
       # =========================
