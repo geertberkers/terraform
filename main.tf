@@ -77,6 +77,8 @@ module "app_service" {
 module "databases" {
   source = "./modules/databases"
 
+  depends_on = [module.app_service]
+
   resource_group_name = "rg-databases-europe"
   location            = "swedencentral"
   env                 = "global"
@@ -89,6 +91,9 @@ module "databases" {
 
   app_service_name = module.app_service.app_name
   app_service_rg   = "rg-app-service-eu"
+
+   # ✅ ADD THIS
+  app_service_principal_id = module.app_service.principal_id
 }
 
 # =========================

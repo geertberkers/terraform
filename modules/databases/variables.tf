@@ -35,3 +35,8 @@ variable "app_service_rg" {
   type        = string
   description = "Resource group of the App Service"
 }
+
+variable "app_service_principal_id" {
+  type        = string
+  description = "Principal ID of the App Service managed identity"
+}
