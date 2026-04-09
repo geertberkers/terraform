@@ -53,3 +53,9 @@ variable "app_service_identity_name" {
   description = "Name of the User Assigned Identity"
   default     = null
 }
+
+variable "enable_app_identity" {
+  type        = bool
+  description = "Enable Managed Identity access for the App Service"
+  default     = false
+}
