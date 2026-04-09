@@ -9,8 +9,8 @@ resource "azurerm_key_vault" "kv" {
   tenant_id           = data.azurerm_client_config.current.tenant_id
   sku_name            = "standard"
 
-  # ✅ Use RBAC instead of access policies
-  enable_rbac_authorization = true
+  # Reverted to access policies because current principal lacks permissions to manage RBAC roles
+  enable_rbac_authorization = false
 
   # Required for Terraform & deployments
   purge_protection_enabled   = false
@@ -20,10 +20,14 @@ resource "azurerm_key_vault" "kv" {
 # ==========================================
 # Allow Terraform (current user/SP) to manage secrets
 # ==========================================
-resource "azurerm_role_assignment" "terraform_kv_admin" {
-  scope                = azurerm_key_vault.kv.id
-  role_definition_name = "Key Vault Administrator"
-  principal_id         = data.azurerm_client_config.current.object_id
+resource "azurerm_key_vault_access_policy" "terraform_admin" {
+  key_vault_id = azurerm_key_vault.kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_client_config.current.object_id
+
+  secret_permissions = [
+    "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"
+  ]
 }
 
 # ==========================================
@@ -55,7 +59,7 @@ resource "azurerm_key_vault_secret" "mysql_pass" {
   value        = random_password.mysql_admin.result
   key_vault_id = azurerm_key_vault.kv.id
 
-  depends_on = [azurerm_role_assignment.terraform_kv_admin]
+  depends_on = [azurerm_key_vault_access_policy.terraform_admin]
 }
 
 resource "azurerm_key_vault_secret" "pg_pass" {
@@ -63,7 +67,7 @@ resource "azurerm_key_vault_secret" "pg_pass" {
   value        = random_password.pg_admin.result
   key_vault_id = azurerm_key_vault.kv.id
 
-  depends_on = [azurerm_role_assignment.terraform_kv_admin]
+  depends_on = [azurerm_key_vault_access_policy.terraform_admin]
 }
 
 resource "azurerm_key_vault_secret" "sql_pass" {
@@ -71,7 +75,7 @@ resource "azurerm_key_vault_secret" "sql_pass" {
   value        = random_password.sql_admin.result
   key_vault_id = azurerm_key_vault.kv.id
 
-  depends_on = [azurerm_role_assignment.terraform_kv_admin]
+  depends_on = [azurerm_key_vault_access_policy.terraform_admin]
 }
 
 resource "azurerm_key_vault_secret" "cosmos_connection" {

@@ -64,10 +64,5 @@ resource "azurerm_key_vault_access_policy" "app_identity_kv" {
   ]
 }
 
-resource "azurerm_role_assignment" "app_kv_secrets_user" {
-  for_each = var.enable_app_identity ? { "enabled" = true } : {}
-
-  scope                = azurerm_key_vault.kv.id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = var.app_service_principal_id
-}
+# Using Access Policies above instead of RBAC Role Assignments 
+# to avoid 400 InsufficientPermissions errors.
