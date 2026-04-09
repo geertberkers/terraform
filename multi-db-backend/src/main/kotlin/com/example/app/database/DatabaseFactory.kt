@@ -4,7 +4,7 @@ import com.azure.core.credential.TokenRequestContext
 import com.azure.identity.DefaultAzureCredentialBuilder
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import com.example.app.appLogger
+import com.example.app.getAppLogger
 import javax.sql.DataSource
 
 object DatabaseFactory {
@@ -12,34 +12,37 @@ object DatabaseFactory {
     private var mysqlDataSource: DataSource? = null
     private var sqlServerDataSource: DataSource? = null
     private var cosmosDataSource: DataSource? = null
+    private lateinit var logger: com.example.app.logging.Logger
 
     fun init() {
+        logger = getAppLogger()
+        
         try {
             pgDataSource = initPostgres()
-            appLogger.info("PostgreSQL connection initialized")
+            logger.info("PostgreSQL connection initialized")
         } catch (e: Exception) {
-            appLogger.warn("Failed to initialize PostgreSQL: ${e.message}")
+            logger.warn("Failed to initialize PostgreSQL: ${e.message}", e)
         }
 
         try {
             mysqlDataSource = initMySQL()
-            appLogger.info("MySQL connection initialized")
+            logger.info("MySQL connection initialized")
         } catch (e: Exception) {
-            appLogger.warn("Failed to initialize MySQL: ${e.message}")
+            logger.warn("Failed to initialize MySQL: ${e.message}", e)
         }
 
         try {
             sqlServerDataSource = initSQLServer()
-            appLogger.info("SQL Server connection initialized")
+            logger.info("SQL Server connection initialized")
         } catch (e: Exception) {
-            appLogger.warn("Failed to initialize SQL Server: ${e.message}")
+            logger.warn("Failed to initialize SQL Server: ${e.message}", e)
         }
 
         try {
             cosmosDataSource = initCosmosDB()
-            appLogger.info("CosmosDB connection initialized")
+            logger.info("CosmosDB connection initialized")
         } catch (e: Exception) {
-            appLogger.warn("Failed to initialize CosmosDB: ${e.message}")
+            logger.warn("Failed to initialize CosmosDB: ${e.message}", e)
         }
     }
 
@@ -67,7 +70,7 @@ object DatabaseFactory {
                     System.getenv("POSTGRES_PASSWORD") ?: ""
                 }
             } catch (e: Exception) {
-                appLogger.warn("Failed to get Azure token for PostgreSQL: ${e.message}")
+                logger.warn("Failed to get Azure token for PostgreSQL: ${e.message}", e)
                 System.getenv("POSTGRES_PASSWORD") ?: ""
             }
             
@@ -76,7 +79,7 @@ object DatabaseFactory {
         }
 
         return HikariDataSource(config).also {
-            appLogger.info("PostgreSQL connection pool initialized")
+            logger.info("PostgreSQL connection pool initialized")
         }
     }
 
@@ -96,7 +99,7 @@ object DatabaseFactory {
         }
 
         return HikariDataSource(config).also {
-            appLogger.info("MySQL connection pool initialized")
+            logger.info("MySQL connection pool initialized")
         }
     }
 
@@ -117,14 +120,14 @@ object DatabaseFactory {
         }
 
         return HikariDataSource(config).also {
-            appLogger.info("SQL Server connection pool initialized")
+            logger.info("SQL Server connection pool initialized")
         }
     }
 
     private fun initCosmosDB(): DataSource? {
         // CosmosDB typically uses SDK, not JDBC
         // This is a placeholder for future SDK integration
-        appLogger.info("CosmosDB integration prepared for SDK setup")
+        logger.info("CosmosDB integration prepared for SDK setup")
         return null
     }
 
@@ -138,7 +141,7 @@ object DatabaseFactory {
 
             token?.token ?: throw IllegalStateException("Azure token retrieval returned null")
         } catch (e: Exception) {
-            appLogger.error("Failed to get Azure token", e)
+            logger.error("Failed to get Azure token", e)
             throw e
         }
     }
