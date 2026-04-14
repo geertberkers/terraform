@@ -445,12 +445,12 @@
         }
 
         function displayResults(result) {
-            if (result.rowCount === 0 && result.rows === undefined) {
-                // Update response
+            // Update/Insert/Delete response (has message and affectedRows, no rows)
+            if (result.rows === undefined) {
                 document.getElementById('resultsContainer').innerHTML = `
                     <div style="padding: 20px; background: #e8f5e9; border-radius: 4px;">
                         <p style="color: #2e7d32; font-weight: 600;">✓ Success</p>
-                        <p>${result.message}</p>
+                        <p>${result.message || 'Operation completed successfully'}</p>
                     </div>
                 `;
                 return;
