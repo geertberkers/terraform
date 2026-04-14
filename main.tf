@@ -96,6 +96,8 @@ module "app_service" {
   app_identity_name         = azurerm_user_assigned_identity.app_identity.name
 
   docker_image_tag = var.docker_image_tag
+  app_version_name = var.app_version_name
+  app_version_code = var.app_version_code
 
   postgres_fqdn     = module.databases.postgres_fqdn
   postgres_user     = module.databases.postgres_user
