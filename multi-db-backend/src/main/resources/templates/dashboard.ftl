@@ -296,6 +296,17 @@
                         <textarea id="queryText" placeholder="Enter your SQL query here..."></textarea>
                     </div>
 
+                    <div class="form-group" style="background: #f5f5f5; padding: 10px; border-radius: 4px; margin-bottom: 15px;">
+                        <label style="font-size: 12px; margin-bottom: 8px;">Quick Examples (Click to Fill):</label>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button type="button" class="example-btn" onclick="fillExample('CREATE TABLE persons (id INT IDENTITY(1,1) PRIMARY KEY, name VARCHAR(255), email VARCHAR(255)); -- Note: Use AUTO_INCREMENT for MySQL, SERIAL for Postgres', 'update')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Create Table</button>
+                            <button type="button" class="example-btn" onclick="fillExample('INSERT INTO persons (name, email) VALUES (\'Alice Smith\', \'alice@example.com\');', 'update')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Insert Person</button>
+                            <button type="button" class="example-btn" onclick="fillExample('SELECT * FROM persons;', 'select')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Select Persons</button>
+                            <button type="button" class="example-btn" onclick="fillExample('DELETE FROM persons WHERE name = \'Alice Smith\';', 'update')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Delete Person</button>
+                            <button type="button" class="example-btn" onclick="fillExample('DROP TABLE persons;', 'update')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Drop Table</button>
+                        </div>
+                    </div>
+
                     <div class="button-group">
                         <button type="button" onclick="executeQuery()">▶️ Execute</button>
                         <button type="button" onclick="clearQuery()">🗑️ Clear</button>
@@ -445,6 +456,18 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        function fillExample(sql, mode) {
+            document.getElementById('queryType').value = mode;
+            document.getElementById('queryText').value = sql;
+            toggleQueryMode(); // Update placeholder if needed
+            
+            // Highlight effect on the textarea to show something happened
+            const ta = document.getElementById('queryText');
+            ta.style.transition = 'background 0.2s';
+            ta.style.background = '#e8f5e9';
+            setTimeout(() => ta.style.background = 'white', 300);
         }
 
         async function checkConnections() {
