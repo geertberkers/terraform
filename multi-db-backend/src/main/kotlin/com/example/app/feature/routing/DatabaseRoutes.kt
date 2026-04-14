@@ -30,13 +30,19 @@ fun Route.databaseRoutes() {
                 logger.info { "Executing query on ${request.database}" }
 
                 val dbType = parseDatabase(request.database)
-                val results = dbService.executeQuery(dbType, request.query) { rs ->
-                    val metadata = rs.metaData
-                    val row = mutableMapOf<String, String?>()
-                    for (i in 1..metadata.columnCount) {
-                        row[metadata.getColumnName(i)] = rs.getObject(i)?.toString()
+                val results: List<Map<String, String?>> = if (dbType == DatabaseType.CosmosDB) {
+                    dbService.executeCosmosQuery(request.query).map { row ->
+                        row.mapValues { (_, value) -> value?.toString() }
                     }
-                    row
+                } else {
+                    dbService.executeQuery(dbType, request.query) { rs ->
+                        val metadata = rs.metaData
+                        val row = mutableMapOf<String, String?>()
+                        for (i in 1..metadata.columnCount) {
+                            row[metadata.getColumnName(i)] = rs.getObject(i)?.toString()
+                        }
+                        row
+                    }
                 }
 
                 val columns = if (results.isNotEmpty()) {

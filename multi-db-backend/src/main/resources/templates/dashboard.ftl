@@ -412,6 +412,8 @@
             const mode = document.getElementById('queryType').value;
             showLoading(true);
             hideError();
+            document.getElementById('resultsContainer').innerHTML =
+                '<div class="no-results">Running query...</div>';
 
             try {
                 let endpoint, body;
