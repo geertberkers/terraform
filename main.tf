@@ -44,8 +44,8 @@ module "switzerland" {
   subnet_cidr = "10.0.1.0/24"
 
   vm_sizes = [
-    "Standard_B1s",
-    "Standard_B1s"
+    "Standard_B2s",
+    "Standard_B2s"
   ]
 
   ssh_public_key = var.ssh_public_key
@@ -65,8 +65,8 @@ module "sweden" {
   subnet_cidr = "10.1.1.0/24"
 
   vm_sizes = [
-    "Standard_B1s",
-    "Standard_B1s"
+    "Standard_B2s",
+    "Standard_B2s"
   ]
 
   ssh_public_key = var.ssh_public_key
