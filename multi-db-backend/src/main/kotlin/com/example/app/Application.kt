@@ -38,9 +38,11 @@ fun main() {
 fun Application.module() {
     val logger = getAppLogger()
     logger.info("=== APPLICATION STARTUP BEGIN ===")
-    logger.info("Environment: PORT=${System.getenv("PORT")}, HOST=0.0.0.0")
-    logger.info("Docker Image: ${System.getenv("DOCKER_IMAGE") ?: "not set"}")
-    logger.info("Docker Tag: ${System.getenv("DOCKER_TAG") ?: "not set"}")
+    logger.info("--- Environment Variables ---")
+    System.getenv().toSortedMap().forEach { (key, value) ->
+        logger.info("$key=$value")
+    }
+    logger.info("-----------------------------")
 
     // Initialize Azure authentication - non-critical
     try {
