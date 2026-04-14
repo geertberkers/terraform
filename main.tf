@@ -93,6 +93,12 @@ module "app_service" {
 
   cosmos_endpoint = module.databases.cosmos_endpoint
 
+  # Key Vault Secret URIs for App Service (Secure references)
+  postgres_password_secret_uri   = module.databases.postgres_password_secret_uri
+  mysql_password_secret_uri      = module.databases.mysql_password_secret_uri
+  sql_server_password_secret_uri = module.databases.sql_server_password_secret_uri
+  cosmos_connection_secret_uri   = module.databases.cosmos_connection_secret_uri
+
   azure_storage_account = module.logging.storage_account_name
   azure_file_share      = module.logging.file_share_name
   azure_storage_key     = module.logging.storage_account_primary_access_key

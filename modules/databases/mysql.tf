@@ -33,7 +33,7 @@ resource "azurerm_mysql_flexible_server_firewall_rule" "allow_azure_services" {
   end_ip_address      = "0.0.0.0"
 }
 
-resource "azurerm_mysql_flexible_server_database" "db" {
+resource "azurerm_mysql_flexible_database" "db" {
   name                = "appdb"
   resource_group_name = azurerm_resource_group.db_rg.name
   server_name         = azurerm_mysql_flexible_server.mysql.name

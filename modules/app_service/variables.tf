@@ -88,6 +88,26 @@ variable "cosmos_endpoint" {
   default     = ""
 }
 
+variable "postgres_password_secret_uri" {
+  type    = string
+  default = ""
+}
+
+variable "mysql_password_secret_uri" {
+  type    = string
+  default = ""
+}
+
+variable "sql_server_password_secret_uri" {
+  type    = string
+  default = ""
+}
+
+variable "cosmos_connection_secret_uri" {
+  type    = string
+  default = ""
+}
+
 variable "azure_storage_account" {
   type        = string
   description = "Azure Storage account name for logging"

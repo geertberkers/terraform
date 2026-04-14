@@ -13,7 +13,7 @@ output "mysql_password" {
 }
 
 output "mysql_db" {
-  value = azurerm_mysql_flexible_server_database.db.name
+  value = azurerm_mysql_flexible_database.db.name
 }
 
 output "postgres_fqdn" {
@@ -54,4 +54,20 @@ output "sql_server_db" {
 
 output "cosmos_endpoint" {
   value = azurerm_cosmosdb_account.cosmos.endpoint
+}
+
+output "mysql_password_secret_uri" {
+  value = azurerm_key_vault_secret.mysql_pass.versionless_id
+}
+
+output "postgres_password_secret_uri" {
+  value = azurerm_key_vault_secret.pg_pass.versionless_id
+}
+
+output "sql_server_password_secret_uri" {
+  value = azurerm_key_vault_secret.sql_pass.versionless_id
+}
+
+output "cosmos_connection_secret_uri" {
+  value = azurerm_key_vault_secret.cosmos_connection.versionless_id
 }

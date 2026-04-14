@@ -1,5 +1,8 @@
 # Azure Infrastructure — Terraform Module (VMs + Databases)
 
+## 📁 Documentation & Walkthroughs
+- [Database & Security Fixes](file:///c:/Users/geert/Projects/GITHUB/geertberkers/terraform/readme/WALKTHROUGH-DATABASE-FIXES.md) — Steps taken to fix database connections and implement Key Vault.
+
 This repository contains a reusable Terraform setup for deploying:
 
 - 2 Linux Virtual Machines (per region)
