@@ -139,6 +139,11 @@ variable "app_identity_id" {
   default     = ""
 }
 
+variable "app_identity_name" {
+  description = "The name of the User Assigned Identity"
+  type        = string
+}
+
 variable "app_identity_client_id" {
   type        = string
   description = "The Client ID of the User Assigned Identity"

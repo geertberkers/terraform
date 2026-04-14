@@ -67,7 +67,8 @@ resource "azurerm_linux_web_app" "app" {
     "COSMOS_CONNECTION_STRING" = var.cosmos_connection_secret_uri != "" ? "@Microsoft.KeyVault(SecretUri=${var.cosmos_connection_secret_uri})" : ""
 
     # Use managed identity for authentication (for databases, not logging)
-    "AZURE_CLIENT_ID" = var.app_identity_client_id
+    "AZURE_CLIENT_ID"     = var.app_identity_client_id
+    "AZURE_IDENTITY_NAME" = var.app_identity_name
 
     # Azure Storage for logging (using access key instead of managed identity)
     "AZURE_STORAGE_ACCOUNT" = var.azure_storage_account

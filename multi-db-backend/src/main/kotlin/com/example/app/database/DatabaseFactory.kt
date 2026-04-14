@@ -83,20 +83,18 @@ object DatabaseFactory {
         val config = HikariConfig().apply {
             driverClassName = "org.postgresql.Driver"
             jdbcUrl = "jdbc:postgresql://$postgresHost:$postgresPort/$postgresDb"
-            username = postgresUser
+            
+            val isManagedIdentity = System.getProperty("azure.credential.initialized") == "true"
+            val identityName = System.getenv("AZURE_IDENTITY_NAME")
 
-            // Try managed identity first, then environment variable
-            password = try {
-                if (System.getProperty("azure.credential.initialized") == "true") {
-                    logger.info("Attempting PostgreSQL connection with Azure Managed Identity")
-                    getAzureTokenForPostgres()
-                } else {
-                    logger.info("Using PostgreSQL password from environment variable")
-                    System.getenv("POSTGRES_PASSWORD") ?: ""
-                }
-            } catch (e: Exception) {
-                logger.warn("Failed to get Azure token for PostgreSQL: ${e.message}, falling back to password", e)
-                System.getenv("POSTGRES_PASSWORD") ?: ""
+            if (isManagedIdentity && !identityName.isNullOrEmpty()) {
+                logger.info("Attempting PostgreSQL connection with Azure Managed Identity: $identityName")
+                username = identityName
+                password = getAzureTokenForPostgres()
+            } else {
+                logger.info("Using PostgreSQL password from environment variable for user: $postgresUser")
+                username = postgresUser
+                password = System.getenv("POSTGRES_PASSWORD") ?: ""
             }
 
             maximumPoolSize = 10

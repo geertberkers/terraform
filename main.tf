@@ -93,6 +93,7 @@ module "app_service" {
   app_identity_id           = azurerm_user_assigned_identity.app_identity.id
   app_identity_client_id    = azurerm_user_assigned_identity.app_identity.client_id
   app_identity_principal_id = azurerm_user_assigned_identity.app_identity.principal_id
+  app_identity_name         = azurerm_user_assigned_identity.app_identity.name
 
   docker_image_tag = var.docker_image_tag
 
