@@ -32,8 +32,7 @@ resource "azurerm_linux_web_app" "app" {
     always_on = true
 
     application_stack {
-      docker_image     = "ghcr.io/geertberkers/terraform/multi-db-backend"
-      docker_image_tag = "latest"
+      docker_image_name = "ghcr.io/geertberkers/terraform/multi-db-backend:latest"
     }
   }
 
@@ -83,7 +82,7 @@ resource "azurerm_linux_web_app" "app" {
 
   lifecycle {
     ignore_changes = [
-      site_config[0].application_stack[0].docker_image_tag
+      site_config[0].application_stack[0].docker_image_name
     ]
   }
 }
