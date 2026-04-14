@@ -16,10 +16,14 @@ val dockerTag: String
     get() = System.getenv("DOCKER_TAG") ?: "unknown"
 
 val versionName: String
-    get() = System.getenv("APP_VERSION_NAME") ?: "unknown"
+    get() = System.getenv("APP_VERSION_NAME") 
+        ?: System.getenv("APPSETTING_APP_VERSION_NAME") 
+        ?: "unknown"
 
 val versionCode: String
-    get() = System.getenv("APP_VERSION_CODE") ?: "unknown"
+    get() = System.getenv("APP_VERSION_CODE") 
+        ?: System.getenv("APPSETTING_APP_VERSION_CODE") 
+        ?: "unknown"
 
 val applicationStartTime: java.time.LocalDateTime = java.time.LocalDateTime.now()
 
