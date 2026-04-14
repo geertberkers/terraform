@@ -79,20 +79,26 @@ jobs:
             -out=tfplan
 
       # =========================
-      # Install SQL tools (separate step)
+      # Setup sqlcmd (cached)
       # =========================
-      - name: Install SQL tools (if needed)
+      - name: Cache go-sqlcmd
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
-          if command -v sqlcmd >/dev/null 2>&1; then
-            echo "sqlcmd already installed, skipping..."
-          else
-            echo "sqlcmd not found, installing mssql-tools18..."
-            sudo apt-get update -y
-            sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
-          fi
+        id: cache-sqlcmd
+        uses: actions/cache@v4
+        with:
+          path: ~/bin/sqlcmd
+          key: ${{ runner.os }}-sqlcmd-v1.6.0
 
-          echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
+      - name: Install go-sqlcmd
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.cache-sqlcmd.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/bin
+          curl -L https://github.com/microsoft/go-sqlcmd/releases/download/v1.6.0/sqlcmd-v1.6.0-linux-x64.tar.bz2 | tar -xj -C ~/bin
+          chmod +x ~/bin/sqlcmd
+
+      - name: Add sqlcmd to PATH
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: echo "$HOME/bin" >> $GITHUB_PATH
 
       # =========================
       # Apply ONLY on main branch push
