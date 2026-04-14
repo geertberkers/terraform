@@ -482,11 +482,11 @@
                 
                 let html = '';
                 for (const [db, status] of Object.entries(data)) {
-                    const isHealthy = typeof status === 'object' && status !== null && status.is_alive == '1';
+                    const isHealthy = status.isAlive === true;
                     const bgColor = isHealthy ? '#e8f5e9' : '#fee';
                     const color = isHealthy ? '#2e7d32' : '#c33';
                     const icon = isHealthy ? '✅' : '❌';
-                    const detail = isHealthy ? status.db_version : status;
+                    const detail = isHealthy ? status.dbVersion : status.error;
                     
                     html += `
                         <div style="flex: 1; min-width: 250px; padding: 15px; background: ${bgColor}; border-left: 4px solid ${color}; border-radius: 4px;">

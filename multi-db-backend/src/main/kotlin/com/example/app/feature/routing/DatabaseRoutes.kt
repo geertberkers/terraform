@@ -69,51 +69,66 @@ fun Route.databaseRoutes() {
 
         // Example query to show some real data
         get("/example-data") {
-            val results = mutableMapOf<String, Any>()
+            val results = mutableMapOf<String, DatabaseStatus>()
 
             // Try to get a basic check from Postgres
              try {
                 val pgResult = dbService.executeQuery(DatabaseType.PostgreSQL, "SELECT 1 as is_alive, version() as db_version") { rs ->
-                    mapOf(
-                        "is_alive" to rs.getObject("is_alive")?.toString(),
-                        "db_version" to rs.getObject("db_version")?.toString()
+                    DatabaseStatus(
+                        isAlive = rs.getObject("is_alive")?.toString() == "1" || rs.getObject("is_alive")?.toString() == "true",
+                        dbVersion = rs.getObject("db_version")?.toString(),
+                        error = null
                     )
                 }
-                results["postgres"] = if (pgResult.isNotEmpty()) pgResult[0] else "No data"
+                results["postgres"] = if (pgResult.isNotEmpty()) pgResult[0] else DatabaseStatus(false, null, "No data")
             } catch (e: Exception) {
-                results["postgres"] = "Error connecting/querying: ${e.message}"
+                results["postgres"] = DatabaseStatus(false, null, "Error: ${e.message}")
             }
 
             // Try MySQL
             try {
                 val mysqlResult = dbService.executeQuery(DatabaseType.MySQL, "SELECT 1 as is_alive, version() as db_version") { rs ->
-                    mapOf(
-                        "is_alive" to rs.getObject("is_alive")?.toString(),
-                        "db_version" to rs.getObject("db_version")?.toString()
+                    DatabaseStatus(
+                        isAlive = rs.getObject("is_alive")?.toString() == "1",
+                        dbVersion = rs.getObject("db_version")?.toString(),
+                        error = null
                     )
                 }
-                results["mysql"] = if (mysqlResult.isNotEmpty()) mysqlResult[0] else "No data"
+                results["mysql"] = if (mysqlResult.isNotEmpty()) mysqlResult[0] else DatabaseStatus(false, null, "No data")
             } catch (e: Exception) {
-                results["mysql"] = "Error connecting/querying: ${e.message}"
+                results["mysql"] = DatabaseStatus(false, null, "Error: ${e.message}")
             }
 
             // Try SQL Server
             try {
                 val sqlResult = dbService.executeQuery(DatabaseType.SQLServer, "SELECT 1 as is_alive, @@VERSION as db_version") { rs ->
-                    mapOf(
-                        "is_alive" to rs.getObject("is_alive")?.toString(),
-                        "db_version" to rs.getObject("db_version")?.toString()
+                    DatabaseStatus(
+                        isAlive = rs.getObject("is_alive")?.toString() == "1",
+                        dbVersion = rs.getObject("db_version")?.toString(),
+                        error = null
                     )
                 }
-                results["sqlserver"] = if (sqlResult.isNotEmpty()) sqlResult[0] else "No data"
+                results["sqlserver"] = if (sqlResult.isNotEmpty()) sqlResult[0] else DatabaseStatus(false, null, "No data")
             } catch (e: Exception) {
-                results["sqlserver"] = "Error connecting/querying: ${e.message}"
+                results["sqlserver"] = DatabaseStatus(false, null, "Error: ${e.message}")
             }
 
-            call.respond(mapOf("example_data" to results))
+            call.respond(ExampleDataResponse(results))
         }
     }
 }
+
+@kotlinx.serialization.Serializable
+data class DatabaseStatus(
+    val isAlive: Boolean,
+    val dbVersion: String?,
+    val error: String?
+)
+
+@kotlinx.serialization.Serializable
+data class ExampleDataResponse(
+    val example_data: Map<String, DatabaseStatus>
+)
 
 private fun parseDatabase(name: String): DatabaseType {
     return when (name.lowercase()) {
