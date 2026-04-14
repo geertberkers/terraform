@@ -76,9 +76,21 @@ module "app_service" {
   location            = "westeurope"
   name_prefix         = "my-web-service"
 
-  postgres_fqdn   = module.databases.postgres_fqdn
-  mysql_fqdn      = module.databases.mysql_fqdn
-  sql_server_fqdn = module.databases.sql_server_fqdn
+  postgres_fqdn     = module.databases.postgres_fqdn
+  postgres_user     = module.databases.postgres_user
+  postgres_password = module.databases.postgres_password
+  postgres_db       = module.databases.postgres_db
+
+  mysql_fqdn     = module.databases.mysql_fqdn
+  mysql_user     = module.databases.mysql_user
+  mysql_password = module.databases.mysql_password
+  mysql_db       = module.databases.mysql_db
+
+  sql_server_fqdn     = module.databases.sql_server_fqdn
+  sql_server_user     = module.databases.sql_server_user
+  sql_server_password = module.databases.sql_server_password
+  sql_server_db       = module.databases.sql_server_db
+
   cosmos_endpoint = module.databases.cosmos_endpoint
 
   azure_storage_account = module.logging.storage_account_name

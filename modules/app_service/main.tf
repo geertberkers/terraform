@@ -52,9 +52,24 @@ resource "azurerm_linux_web_app" "app" {
     "DOCKER_TAG"   = "latest"
 
     # Database connection settings
-    "POSTGRES_HOST"   = var.postgres_fqdn
-    "MYSQL_HOST"      = var.mysql_fqdn
-    "SQL_SERVER_HOST" = var.sql_server_fqdn
+    "POSTGRES_HOST"     = var.postgres_fqdn
+    "POSTGRES_USER"     = var.postgres_user
+    "POSTGRES_PASSWORD" = var.postgres_password
+    "POSTGRES_DB"       = var.postgres_db
+    "POSTGRES_PORT"     = "5432"
+
+    "MYSQL_HOST"     = var.mysql_fqdn
+    "MYSQL_USER"     = var.mysql_user
+    "MYSQL_PASSWORD" = var.mysql_password
+    "MYSQL_DB"       = var.mysql_db
+    "MYSQL_PORT"     = "3306"
+
+    "SQL_SERVER_HOST"     = var.sql_server_fqdn
+    "SQLSERVER_USER"      = var.sql_server_user
+    "SQLSERVER_PASSWORD"  = var.sql_server_password
+    "SQLSERVER_DB"        = var.sql_server_db
+    "SQLSERVER_PORT"      = "1433"
+
     "COSMOS_ENDPOINT" = var.cosmos_endpoint
 
     # Use managed identity for authentication (for databases, not logging)

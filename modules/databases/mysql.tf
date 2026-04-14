@@ -23,3 +23,20 @@ resource "azurerm_mysql_flexible_server" "mysql" {
     ignore_changes = [zone]
   }
 }
+
+# Allow Azure Services (including App Service) to connect
+resource "azurerm_mysql_flexible_server_firewall_rule" "allow_azure_services" {
+  name                = "allow-azure-services"
+  resource_group_name = azurerm_resource_group.db_rg.name
+  server_name         = azurerm_mysql_flexible_server.mysql.name
+  start_ip_address    = "0.0.0.0"
+  end_ip_address      = "0.0.0.0"
+}
+
+resource "azurerm_mysql_flexible_server_database" "db" {
+  name                = "appdb"
+  resource_group_name = azurerm_resource_group.db_rg.name
+  server_name         = azurerm_mysql_flexible_server.mysql.name
+  charset             = "utf8mb3"
+  collation           = "utf8mb3_general_ci"
+}

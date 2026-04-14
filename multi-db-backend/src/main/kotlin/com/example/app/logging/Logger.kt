@@ -3,6 +3,10 @@ package com.example.app.logging
 import mu.KotlinLogging
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import com.azure.storage.file.share.ShareClientBuilder
+import com.azure.storage.common.StorageSharedKeyCredential
+import java.io.ByteArrayInputStream
+import java.nio.charset.StandardCharsets
 
 interface Logger {
     fun log(level: LogLevel, message: String, throwable: Throwable? = null)
@@ -63,9 +67,44 @@ class AzureFileLogger(
     }
 
     private fun logToAzureStorage(level: LogLevel, message: String, throwable: Throwable?) {
-        // TODO: Implement Azure Storage File Share logging with access key
-        // For now, just log that we'd write to Azure
-        logger.info { "Would log to Azure Storage: [$level] $message" }
+        val timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        val logLine = "[$timestamp] [$level] $message${throwable?.let { "\n${it.stackTraceToString()}" } ?: ""}\n"
+        val data = logLine.toByteArray(StandardCharsets.UTF_8)
+
+        try {
+            val shareClient = ShareClientBuilder()
+                .endpoint("https://$accountName.file.core.windows.net")
+                .credential(StorageSharedKeyCredential(accountName, accountKey))
+                .shareName(shareName)
+                .buildClient()
+
+            val dirClient = shareClient.getDirectoryClient(directoryName)
+            if (!dirClient.exists()) {
+                dirClient.create()
+            }
+
+            val fileClient = dirClient.getFileClient("app.log")
+            var offset: Long = 0
+            if (!fileClient.exists()) {
+                fileClient.create(1024 * 1024) // 1MB initial size
+            } else {
+                offset = fileClient.properties.fileSize
+                // If file is getting too large (e.g. > 1MB), we might want to rotate it
+                // but for now we just append
+                if (offset + data.size > 1024 * 1024) {
+                    // Simple rotation: clear and restart
+                    fileClient.delete()
+                    fileClient.create(1024 * 1024)
+                    offset = 0
+                }
+            }
+
+            fileClient.uploadRange(ByteArrayInputStream(data), offset, data.size.toLong())
+            
+        } catch (e: Exception) {
+            // Fallback to console if Azure logging fails
+            System.err.println("Azure logging failed: ${e.message}")
+        }
     }
 
     override fun info(message: String) = log(LogLevel.INFO, message)

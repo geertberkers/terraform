@@ -19,16 +19,67 @@ variable "postgres_fqdn" {
   default     = ""
 }
 
+variable "postgres_user" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+
+variable "postgres_password" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+
+variable "postgres_db" {
+  type    = string
+  default = "appdb"
+}
+
 variable "mysql_fqdn" {
   type        = string
   description = "MySQL server FQDN"
   default     = ""
 }
 
+variable "mysql_user" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+
+variable "mysql_password" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+
+variable "mysql_db" {
+  type    = string
+  default = "appdb"
+}
+
 variable "sql_server_fqdn" {
   type        = string
   description = "SQL Server FQDN"
   default     = ""
+}
+
+variable "sql_server_user" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+
+variable "sql_server_password" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+
+variable "sql_server_db" {
+  type    = string
+  default = "master"
 }
 
 variable "cosmos_endpoint" {
