@@ -1,14 +1,24 @@
 output "databases" {
-  value = module.databases
+  value     = module.databases
+  sensitive = true
+}
+
+output "database_endpoints" {
+  value = {
+    postgres = module.databases.postgres_fqdn
+    mysql    = module.databases.mysql_fqdn
+    sql      = module.databases.sql_server_fqdn
+    cosmos   = module.databases.cosmos_endpoint
+  }
 }
 
 output "dns_zone_name" {
   value = module.dns.zone_name
 }
 
-output "dns_nameservers" {
-  value = module.dns.nameservers
-}
+# output "dns_nameservers" {
+#  value = module.dns.nameservers
+# }
 
 output "app_hostname" {
   value = module.app_service.default_hostname
