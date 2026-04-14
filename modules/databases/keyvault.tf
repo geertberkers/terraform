@@ -10,28 +10,19 @@ resource "azurerm_key_vault" "kv" {
   resource_group_name = azurerm_resource_group.db_rg.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
   sku_name            = "standard"
-
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-
-    key_permissions = [
-      "Get", "List", "Create", "Delete", "Recover", "Backup", "Restore", "Purge"
-    ]
-
-    secret_permissions = [
-      "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"
-    ]
-  }
 }
 
-resource "azurerm_key_vault_access_policy" "app_policy" {
+resource "azurerm_key_vault_access_policy" "current_user_policy" {
   key_vault_id = azurerm_key_vault.kv.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = var.app_identity_principal_id
+  object_id    = data.azurerm_client_config.current.object_id
+
+  key_permissions = [
+    "Get", "List", "Create", "Delete", "Recover", "Backup", "Restore", "Purge"
+  ]
 
   secret_permissions = [
-    "Get", "List"
+    "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"
   ]
 }
 

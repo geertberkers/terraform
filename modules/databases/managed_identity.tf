@@ -7,7 +7,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "po
   tenant_id           = data.azurerm_client_config.current.tenant_id
   object_id           = var.app_identity_principal_id
   principal_type      = "ServicePrincipal"
-  principal_name      = "app-identity"
+  principal_name      = var.app_identity_name
 }
 
 # ==========================================
