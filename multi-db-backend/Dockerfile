@@ -1,14 +1,23 @@
-# Multi-stage build
+# Multi-stage build for Kotlin Backend
 FROM gradle:8.5-jdk17 as builder
 
+# Set working directory
 WORKDIR /src
 
-# Copy build files
+# 1. Cache dependencies (The "First Part" of the build)
+# Copy only the files needed for dependency resolution
 COPY build.gradle.kts settings.gradle.kts ./
 COPY gradle gradle/
+
+# Pre-download dependencies to a separate layer.
+# This will be cached unless build.gradle.kts changes.
+RUN gradle build --no-daemon > /dev/null 2>&1 || true
+
+# 2. Build the Application
+# Copy the actual source code
 COPY src src/
 
-# Build JAR
+# Build the Shadow JAR
 RUN gradle shadowJar --no-daemon
 
 # Runtime stage
