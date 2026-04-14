@@ -121,6 +121,22 @@ fun Route.databaseRoutes() {
                 results["sqlserver"] = DatabaseStatus(false, null, "Error: ${e.message}")
             }
 
+            // Try CosmosDB
+            try {
+                val cosmosEndpoint = System.getenv("COSMOS_ENDPOINT")
+                if (!cosmosEndpoint.isNullOrEmpty()) {
+                    results["cosmosdb"] = DatabaseStatus(
+                        isAlive = true,
+                        dbVersion = "CosmosDB (endpoint: ${cosmosEndpoint.take(40)}...)",
+                        error = null
+                    )
+                } else {
+                    results["cosmosdb"] = DatabaseStatus(false, null, "COSMOS_ENDPOINT not configured")
+                }
+            } catch (e: Exception) {
+                results["cosmosdb"] = DatabaseStatus(false, null, "Error: ${e.message}")
+            }
+
             call.respond(ExampleDataResponse(results))
         }
     }

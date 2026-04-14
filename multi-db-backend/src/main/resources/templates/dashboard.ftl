@@ -298,12 +298,8 @@
 
                     <div class="form-group" style="background: #f5f5f5; padding: 10px; border-radius: 4px; margin-bottom: 15px;">
                         <label style="font-size: 12px; margin-bottom: 8px;">Quick Examples (Click to Fill):</label>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button type="button" class="example-btn" onclick="fillExample('CREATE TABLE persons (id INT IDENTITY(1,1) PRIMARY KEY, name VARCHAR(255), email VARCHAR(255)); -- Note: Use AUTO_INCREMENT for MySQL, SERIAL for Postgres', 'update')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Create Table</button>
-                            <button type="button" class="example-btn" onclick="fillExample('INSERT INTO persons (name, email) VALUES (\'Alice Smith\', \'alice@example.com\');', 'update')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Insert Person</button>
-                            <button type="button" class="example-btn" onclick="fillExample('SELECT * FROM persons;', 'select')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Select Persons</button>
-                            <button type="button" class="example-btn" onclick="fillExample('DELETE FROM persons WHERE name = \'Alice Smith\';', 'update')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Delete Person</button>
-                            <button type="button" class="example-btn" onclick="fillExample('DROP TABLE persons;', 'update')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Drop Table</button>
+                        <div id="exampleBtnContainer" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <span style="font-size:11px;color:#999;">Select a database to see examples</span>
                         </div>
                     </div>
 
@@ -330,6 +326,38 @@
         <#noparse>
         let selectedDatabase = null;
 
+        // Per-database SQL examples with correct syntax for each engine
+        const dbExamples = {
+            postgresql: {
+                create: "CREATE TABLE persons (id SERIAL PRIMARY KEY, name VARCHAR(255), email VARCHAR(255));",
+                insert: "INSERT INTO persons (name, email) VALUES ('Alice Smith', 'alice@example.com');",
+                select: "SELECT * FROM persons;",
+                delete: "DELETE FROM persons WHERE name = 'Alice Smith';",
+                drop: "DROP TABLE IF EXISTS persons;"
+            },
+            mysql: {
+                create: "CREATE TABLE persons (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255));",
+                insert: "INSERT INTO persons (name, email) VALUES ('Alice Smith', 'alice@example.com');",
+                select: "SELECT * FROM persons;",
+                delete: "DELETE FROM persons WHERE name = 'Alice Smith';",
+                drop: "DROP TABLE IF EXISTS persons;"
+            },
+            sqlserver: {
+                create: "CREATE TABLE persons (id INT IDENTITY(1,1) PRIMARY KEY, name NVARCHAR(255), email NVARCHAR(255));",
+                insert: "INSERT INTO persons (name, email) VALUES ('Alice Smith', 'alice@example.com');",
+                select: "SELECT * FROM persons;",
+                delete: "DELETE FROM persons WHERE name = 'Alice Smith';",
+                drop: "IF OBJECT_ID('persons', 'U') IS NOT NULL DROP TABLE persons;"
+            },
+            cosmosdb: {
+                create: "-- CosmosDB: Create items via JSON\n{\"id\": \"1\", \"name\": \"Alice Smith\", \"email\": \"alice@example.com\"}",
+                insert: "-- CosmosDB: Upsert item\n{\"id\": \"2\", \"name\": \"Bob Jones\", \"email\": \"bob@example.com\"}",
+                select: "SELECT * FROM c",
+                delete: "-- CosmosDB: Delete by id\n{\"id\": \"1\"}",
+                drop: "-- CosmosDB: Container management not supported via SQL"
+            }
+        };
+
         // Database selection
         document.querySelectorAll('.database-list li').forEach(li => {
             li.addEventListener('click', function() {
@@ -337,8 +365,29 @@
                 this.classList.add('active');
                 selectedDatabase = this.dataset.database;
                 document.getElementById('selectedDb').value = selectedDatabase.charAt(0).toUpperCase() + selectedDatabase.slice(1);
+                updateExampleButtons();
             });
         });
+
+        function updateExampleButtons() {
+            const container = document.getElementById('exampleBtnContainer');
+            if (!selectedDatabase || !dbExamples[selectedDatabase]) {
+                container.innerHTML = '<span style="font-size:11px;color:#999;">Select a database to see examples</span>';
+                return;
+            }
+            const ex = dbExamples[selectedDatabase];
+            container.innerHTML = `
+                <button type="button" class="example-btn" onclick="fillExample('${escapeJs(ex.create)}', 'update')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Create Table</button>
+                <button type="button" class="example-btn" onclick="fillExample('${escapeJs(ex.insert)}', 'update')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Insert Person</button>
+                <button type="button" class="example-btn" onclick="fillExample('${escapeJs(ex.select)}', 'select')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Select Persons</button>
+                <button type="button" class="example-btn" onclick="fillExample('${escapeJs(ex.delete)}', 'update')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Delete Person</button>
+                <button type="button" class="example-btn" onclick="fillExample('${escapeJs(ex.drop)}', 'update')" style="padding: 5px 10px; font-size: 11px; background: #ddd; color: #333;">Drop Table</button>
+            `;
+        }
+
+        function escapeJs(str) {
+            return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+        }
 
         function toggleQueryMode() {
             const mode = document.getElementById('queryType').value;
@@ -354,8 +403,8 @@
                 return;
             }
 
-            const query = document.getElementById('queryText').value.trim();
-            if (!query) {
+            const queryText = document.getElementById('queryText').value.trim();
+            if (!queryText) {
                 showError('Please enter a query');
                 return;
             }
@@ -365,15 +414,19 @@
             hideError();
 
             try {
-                const endpoint = mode === 'select' ? '/api/database/query' : '/api/database/execute';
+                let endpoint, body;
+                if (mode === 'select') {
+                    endpoint = '/api/database/query';
+                    body = { database: selectedDatabase, query: queryText };
+                } else {
+                    endpoint = '/api/database/execute';
+                    body = { database: selectedDatabase, sql: queryText, params: [] };
+                }
+
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        database: selectedDatabase,
-                        query: query,
-                        params: []
-                    })
+                    body: JSON.stringify(body)
                 });
 
                 if (!response.ok) {
@@ -461,9 +514,8 @@
         function fillExample(sql, mode) {
             document.getElementById('queryType').value = mode;
             document.getElementById('queryText').value = sql;
-            toggleQueryMode(); // Update placeholder if needed
+            toggleQueryMode();
             
-            // Highlight effect on the textarea to show something happened
             const ta = document.getElementById('queryText');
             ta.style.transition = 'background 0.2s';
             ta.style.background = '#e8f5e9';

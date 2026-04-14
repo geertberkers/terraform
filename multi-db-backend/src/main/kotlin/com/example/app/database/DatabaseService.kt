@@ -94,7 +94,8 @@ class DatabaseService {
         if (DatabaseFactory.getPostgresDataSource() != null) available.add("PostgreSQL")
         if (DatabaseFactory.getMySQLDataSource() != null) available.add("MySQL")
         if (DatabaseFactory.getSQLServerDataSource() != null) available.add("SQLServer")
-        if (DatabaseFactory.getCosmosDataSource() != null) available.add("CosmosDB")
+        val cosmosEndpoint = System.getenv("COSMOS_ENDPOINT")
+        if (!cosmosEndpoint.isNullOrEmpty()) available.add("CosmosDB")
         return available
     }
 
