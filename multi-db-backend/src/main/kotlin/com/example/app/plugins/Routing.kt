@@ -86,9 +86,9 @@ fun Application.configureRouting() {
             call.respondText(html, ContentType.Text.Html)
         }
 
-        // Health check
+        // Health check - plain text response for fastest possible startup probe
         get("/health") {
-            call.respond(mapOf("status" to "healthy"))
+            call.respondText("{\"status\":\"healthy\"}", io.ktor.http.ContentType.Application.Json)
         }
 
         // Dashboard HTML
