@@ -17,7 +17,8 @@ class AzureFileLogger(
     private val shareName: String,
     private val directoryName: String,
     private val accountName: String,
-    private val accountKey: String? = null
+    private val accountKey: String? = null,
+    private val fileName: String = "app.log"
 ) : Logger {
     private val consoleLogger = ConsoleLogger()
     private val logger = KotlinLogging.logger {}
@@ -54,7 +55,7 @@ class AzureFileLogger(
                 dirClient.create()
             }
 
-            val fileClient = dirClient.getFileClient("app.log")
+            val fileClient = dirClient.getFileClient(fileName)
             
             // 1. Determine the actual data offset using metadata
             var currentOffset: Long = 0

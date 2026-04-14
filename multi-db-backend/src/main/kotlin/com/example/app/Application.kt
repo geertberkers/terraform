@@ -90,6 +90,7 @@ private fun initializeLogger() {
     val fileShare = System.getenv("AZURE_FILE_SHARE") ?: "logs"
     val logDirectory = System.getenv("AZURE_LOG_DIRECTORY") ?: "app-logs"
     val storageKey = System.getenv("AZURE_STORAGE_KEY")
+    val logFileName = System.getenv("AZURE_LOG_FILENAME") ?: "app.log"
 
     val logger = if (storageAccount != null && storageAccount.isNotEmpty()) {
         try {
@@ -97,7 +98,8 @@ private fun initializeLogger() {
                 shareName = fileShare,
                 directoryName = logDirectory,
                 accountName = storageAccount,
-                accountKey = storageKey
+                accountKey = storageKey,
+                fileName = logFileName
             )
             MultiLogger(listOf(ConsoleLogger(), azureLogger))
         } catch (e: Exception) {
