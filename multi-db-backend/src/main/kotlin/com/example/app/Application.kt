@@ -10,6 +10,8 @@ import com.example.app.logging.Logger
 import com.example.app.logging.ConsoleLogger
 import com.example.app.getAppLogger
 import com.example.app.setAppLogger
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 private val consoleLogger = ConsoleLogger()
 
@@ -53,13 +55,16 @@ fun Application.module() {
         logger.warn("✗ Azure authentication failed, continuing without it", e)
     }
 
-    // Initialize database connections - non-critical for startup
-    try {
-        logger.info("Initializing database connections...")
-        initializeDatabases()
-        logger.info("✓ Database connections initialized successfully")
-    } catch (e: Exception) {
-        logger.error("✗ Database initialization failed, application will continue without database connectivity", e)
+    // Initialize database connections in background so server starts fast
+    // This prevents Azure warmup probe from timing out
+    GlobalScope.launch {
+        try {
+            logger.info("Initializing database connections (background)...")
+            initializeDatabases()
+            logger.info("✓ Database connections initialized successfully")
+        } catch (e: Exception) {
+            logger.error("✗ Database initialization failed, application will continue without database connectivity", e)
+        }
     }
 
     // Install plugins - these are critical
