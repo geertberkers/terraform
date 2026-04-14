@@ -15,6 +15,11 @@ terraform {
   # Backend stays in backend.tf
 }
 
+moved {
+  from = module.app_service.azurerm_user_assigned_identity.app_identity
+  to   = azurerm_user_assigned_identity.app_identity
+}
+
 # =========================
 # AZURE PROVIDER (FIXED)
 # =========================
