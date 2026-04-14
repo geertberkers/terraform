@@ -161,3 +161,15 @@ variable "docker_image_tag" {
   description = "The tag of the Docker image to deploy"
   default     = "latest"
 }
+
+variable "app_version_name" {
+  type        = string
+  description = "Application version name"
+  default     = "unknown"
+}
+
+variable "app_version_code" {
+  type        = string
+  description = "Application version/build code"
+  default     = "unknown"
+}

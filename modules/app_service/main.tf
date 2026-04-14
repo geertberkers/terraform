@@ -31,7 +31,8 @@ resource "azurerm_linux_web_app" "app" {
   key_vault_reference_identity_id = var.app_identity_id
 
   site_config {
-    always_on = true
+    always_on        = true
+    health_check_path = "/health"
 
     application_stack {
       docker_image_name = "ghcr.io/geertberkers/terraform/multi-db-backend:${var.docker_image_tag}"
@@ -77,6 +78,13 @@ resource "azurerm_linux_web_app" "app" {
     "AZURE_FILE_SHARE"      = var.azure_file_share
     "AZURE_LOG_DIRECTORY"   = var.azure_log_directory
     "AZURE_STORAGE_KEY"     = var.azure_storage_key
+
+    # App version info
+    "APP_VERSION_NAME" = var.app_version_name
+    "APP_VERSION_CODE" = var.app_version_code
+
+    # Container startup limit (seconds)
+    "WEBSITES_CONTAINER_START_TIME_LIMIT" = "1800"
   }
 
   depends_on = [
@@ -86,8 +94,6 @@ resource "azurerm_linux_web_app" "app" {
   lifecycle {
     ignore_changes = [
       site_config[0].application_stack[0].docker_image_name,
-      app_settings["APP_VERSION_NAME"],
-      app_settings["APP_VERSION_CODE"],
       app_settings["AZURE_LOG_FILENAME"]
     ]
   }
