@@ -111,6 +111,19 @@ jobs:
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          app-settings-json: |
+            [
+              {
+                "name": "DOCKER_TAG",
+                "value": "${{ github.sha }}",
+                "slotSetting": false
+              },
+              {
+                "name": "DOCKER_IMAGE",
+                "value": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}",
+                "slotSetting": false
+              }
+            ]
 
       - name: Azure Logout
         run: az logout
