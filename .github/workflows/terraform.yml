@@ -104,12 +104,28 @@ jobs:
       # =========================
       # Plan
       # =========================
+      - name: Read app version from Gradle
+        id: app_version
+        run: |
+          VERSION_NAME=$(sed -n 's/^version = "\(.*\)"/\1/p' multi-db-backend/build.gradle.kts | head -n 1)
+          VERSION_CODE=$(sed -n 's/^val versionCode = \(.*\)/\1/p' multi-db-backend/build.gradle.kts | head -n 1)
+
+          if [ -z "$VERSION_NAME" ] || [ -z "$VERSION_CODE" ]; then
+            echo "Failed to read version fields from multi-db-backend/build.gradle.kts"
+            exit 1
+          fi
+
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+
       - name: Terraform Plan
         run: |
           terraform plan \
             -lock-timeout=10m \
             -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
             -var="docker_image_tag=${{ github.sha }}" \
+            -var="app_version_name=${{ steps.app_version.outputs.version_name }}" \
+            -var="app_version_code=${{ steps.app_version.outputs.version_code }}" \
             -out=tfplan
 
 
