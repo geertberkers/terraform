@@ -10,7 +10,7 @@ resource "azurerm_mysql_flexible_server" "mysql" {
   version  = "8.0.21"
 
   storage {
-    size_gb = 32
+    size_gb = 20
   }
 
   backup_retention_days = 7
