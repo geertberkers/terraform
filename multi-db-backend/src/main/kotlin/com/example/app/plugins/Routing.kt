@@ -7,15 +7,26 @@ import io.ktor.server.routing.*
 import com.example.app.feature.routing.databaseRoutes
 import com.example.app.feature.routing.dashboardRoutes
 
+
+// ✅ Centralized environment getters
+val dockerImage: String
+    get() = System.getenv("DOCKER_IMAGE") ?: "unknown"
+
+val dockerTag: String
+    get() = System.getenv("DOCKER_TAG") ?: "unknown"
+
+val versionName: String
+    get() = System.getenv("APP_VERSION_NAME") ?: "unknown"
+
+val versionCode: String
+    get() = System.getenv("APP_VERSION_CODE") ?: "unknown"
+
+
 fun Application.configureRouting() {
     routing {
         // Root endpoint - show deployment info
         get("/") {
             val timestamp = java.time.LocalDateTime.now()
-            val dockerImage = System.getenv("DOCKER_IMAGE") ?: "unknown"
-            val dockerTag = System.getenv("DOCKER_TAG") ?: "unknown"
-            val versionName: String = System.getenv("APP_VERSION_NAME") ?: "unknown"
-            val versionCode: String = System.getenv("APP_VERSION_CODE") ?: "unknown"
 
             val html = """
                 <!DOCTYPE html>
