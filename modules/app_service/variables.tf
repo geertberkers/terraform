@@ -150,3 +150,9 @@ variable "app_identity_principal_id" {
   description = "The Principal ID of the User Assigned Identity"
   default     = ""
 }
+
+variable "docker_image_tag" {
+  type        = string
+  description = "The tag of the Docker image to deploy"
+  default     = "latest"
+}

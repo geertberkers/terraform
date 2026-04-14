@@ -32,7 +32,7 @@ resource "azurerm_linux_web_app" "app" {
     always_on = true
 
     application_stack {
-      docker_image_name = "ghcr.io/geertberkers/terraform/multi-db-backend:latest"
+      docker_image_name = "ghcr.io/geertberkers/terraform/multi-db-backend:${var.docker_image_tag}"
     }
   }
 
@@ -42,7 +42,7 @@ resource "azurerm_linux_web_app" "app" {
 
     # Docker deployment info
     "DOCKER_IMAGE" = "ghcr.io/geertberkers/terraform/multi-db-backend"
-    "DOCKER_TAG"   = "latest"
+    "DOCKER_TAG"   = var.docker_image_tag
 
     # Database connection settings
     "POSTGRES_HOST"     = var.postgres_fqdn

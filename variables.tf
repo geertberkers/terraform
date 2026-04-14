@@ -33,3 +33,9 @@ variable "dns_subdomain" {
   type    = string
   default = "azure"
 }
+
+variable "docker_image_tag" {
+  type        = string
+  description = "The tag of the Docker image to deploy"
+  default     = "latest"
+}
