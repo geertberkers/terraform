@@ -121,5 +121,4 @@ jobs:
         run: |
           terraform apply \
             -lock-timeout=10m \
-            -var="docker_image_tag=${{ github.sha }}" \
             -auto-approve tfplan
