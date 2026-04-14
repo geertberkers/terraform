@@ -25,46 +25,54 @@ fun Route.databaseRoutes() {
 
         // Execute query
         post("/query") {
-            val request = call.receive<QueryRequest>()
-            logger.info { "Executing query on ${request.database}" }
+            try {
+                val request = call.receive<QueryRequest>()
+                logger.info { "Executing query on ${request.database}" }
 
-            val dbType = parseDatabase(request.database)
-            val results = dbService.executeQuery(dbType, request.query) { rs ->
-                val metadata = rs.metaData
-                val row = mutableMapOf<String, String?>()
-                for (i in 1..metadata.columnCount) {
-                    row[metadata.getColumnName(i)] = rs.getObject(i)?.toString()
+                val dbType = parseDatabase(request.database)
+                val results = dbService.executeQuery(dbType, request.query) { rs ->
+                    val metadata = rs.metaData
+                    val row = mutableMapOf<String, String?>()
+                    for (i in 1..metadata.columnCount) {
+                        row[metadata.getColumnName(i)] = rs.getObject(i)?.toString()
+                    }
+                    row
                 }
-                row
-            }
 
-            val columns = if (results.isNotEmpty()) {
-                results[0].keys.toList()
-            } else {
-                emptyList()
-            }
+                val columns = if (results.isNotEmpty()) {
+                    results[0].keys.toList()
+                } else {
+                    emptyList()
+                }
 
-            call.respond(QueryResponse(
-                database = request.database,
-                rowCount = results.size,
-                columns = columns,
-                rows = results
-            ))
+                call.respond(QueryResponse(
+                    database = request.database,
+                    rowCount = results.size,
+                    columns = columns,
+                    rows = results
+                ))
+            } catch (e: Exception) {
+                call.respond(io.ktor.http.HttpStatusCode.BadRequest, mapOf("message" to (e.message ?: "Unknown error")))
+            }
         }
 
         // Execute update/insert/delete
         post("/execute") {
-            val request = call.receive<ExecuteUpdateRequest>()
-            logger.info { "Executing update on ${request.database}" }
+            try {
+                val request = call.receive<ExecuteUpdateRequest>()
+                logger.info { "Executing update on ${request.database}" }
 
-            val dbType = parseDatabase(request.database)
-            val affectedRows = dbService.executeUpdate(dbType, request.sql, request.params.map { it as Any })
+                val dbType = parseDatabase(request.database)
+                val affectedRows = dbService.executeUpdate(dbType, request.sql, request.params.map { it as Any })
 
-            call.respond(ExecuteUpdateResponse(
-                database = request.database,
-                affectedRows = affectedRows,
-                message = "Successfully executed. Affected rows: $affectedRows"
-            ))
+                call.respond(ExecuteUpdateResponse(
+                    database = request.database,
+                    affectedRows = affectedRows,
+                    message = "Successfully executed. Affected rows: $affectedRows"
+                ))
+            } catch (e: Exception) {
+                call.respond(io.ktor.http.HttpStatusCode.BadRequest, mapOf("message" to (e.message ?: "Unknown error")))
+            }
         }
 
         // Example query to show some real data
