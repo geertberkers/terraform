@@ -64,11 +64,11 @@ resource "azurerm_linux_web_app" "app" {
     "MYSQL_DB"       = var.mysql_db
     "MYSQL_PORT"     = "3306"
 
-    "SQL_SERVER_HOST"     = var.sql_server_fqdn
-    "SQLSERVER_USER"      = var.sql_server_user
-    "SQLSERVER_PASSWORD"  = var.sql_server_password
-    "SQLSERVER_DB"        = var.sql_server_db
-    "SQLSERVER_PORT"      = "1433"
+    "SQL_SERVER_HOST"    = var.sql_server_fqdn
+    "SQLSERVER_USER"     = var.sql_server_user
+    "SQLSERVER_PASSWORD" = var.sql_server_password
+    "SQLSERVER_DB"       = var.sql_server_db
+    "SQLSERVER_PORT"     = "1433"
 
     "COSMOS_ENDPOINT" = var.cosmos_endpoint
 
