@@ -35,12 +35,16 @@ class DatabaseService {
                     while (resultSet.next()) {
                         results.add(mapper(resultSet))
                     }
-                    logger.info("RESULT: Success | Retrieved ${results.size} row(s)")
+                    val resultStr = "Success | Retrieved ${results.size} row(s)"
+                    logger.info("RESULT: $resultStr")
+                    logQueryToFile(dbType.javaClass.simpleName, query, resultStr)
                     results
                 }
             }
         } catch (e: Exception) {
-            logger.error("RESULT: Error | Query execution failed: ${e.message}", e)
+            val resultStr = "Error | Query execution failed: ${e.message}"
+            logger.error("RESULT: $resultStr", e)
+            logQueryToFile(dbType.javaClass.simpleName, query, resultStr)
             throw AppError.DatabaseError("Failed to execute query: ${e.message}")
         }
     }
@@ -73,10 +77,14 @@ class DatabaseService {
                     statement.executeUpdate()
                 }
             }
-            logger.info("RESULT: Success | Affected $affectedRows row(s)")
+            val resultStr = "Success | Affected $affectedRows row(s)"
+            logger.info("RESULT: $resultStr")
+            logQueryToFile(dbType.javaClass.simpleName, sql, resultStr)
             affectedRows
         } catch (e: Exception) {
-            logger.error("RESULT: Error | Update execution failed: ${e.message}", e)
+            val resultStr = "Error | Update execution failed: ${e.message}"
+            logger.error("RESULT: $resultStr", e)
+            logQueryToFile(dbType.javaClass.simpleName, sql, resultStr)
             throw AppError.DatabaseError("Failed to execute update: ${e.message}")
         }
     }
@@ -96,6 +104,46 @@ class DatabaseService {
             DatabaseType.MySQL -> DatabaseFactory.getMySQLDataSource()
             DatabaseType.SQLServer -> DatabaseFactory.getSQLServerDataSource()
             DatabaseType.CosmosDB -> DatabaseFactory.getCosmosDataSource()
+        }
+    }
+
+    private fun logQueryToFile(dbName: String, query: String, resultStr: String) {
+        val accountName = System.getenv("AZURE_STORAGE_ACCOUNT")
+        val accountKey = System.getenv("AZURE_STORAGE_KEY")
+        val shareName = System.getenv("AZURE_FILE_SHARE") ?: "logs"
+        val directoryName = System.getenv("AZURE_LOG_DIRECTORY") ?: "app-logs"
+        
+        if (accountKey.isNullOrEmpty() || accountName.isNullOrEmpty()) return
+
+        val timestampSafe = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"))
+        val specificFileName = "query_${dbName}_${timestampSafe}.log"
+        
+        val logLine = "Timestamp: ${java.time.LocalDateTime.now()}\nDatabase: $dbName\nQuery: $query\nResult:\n$resultStr\n"
+        val data = logLine.toByteArray(java.nio.charset.StandardCharsets.UTF_8)
+
+        try {
+            val shareClient = com.azure.storage.file.share.ShareClientBuilder()
+                .endpoint("https://$accountName.file.core.windows.net")
+                .credential(com.azure.storage.common.StorageSharedKeyCredential(accountName, accountKey))
+                .shareName(shareName)
+                .buildClient()
+
+            val rootDirClient = shareClient.getDirectoryClient(directoryName)
+            if (!rootDirClient.exists()) rootDirClient.create()
+            
+            val queriesDirClient = rootDirClient.getSubdirectoryClient("queries")
+            if (!queriesDirClient.exists()) queriesDirClient.create()
+            
+            val dbDirClient = queriesDirClient.getSubdirectoryClient(dbName.lowercase())
+            if (!dbDirClient.exists()) dbDirClient.create()
+
+            val fileClient = dbDirClient.getFileClient(specificFileName)
+            fileClient.create(data.size.toLong())
+
+            val options = com.azure.storage.file.share.models.ShareFileUploadRangeOptions(java.io.ByteArrayInputStream(data), data.size.toLong()).setOffset(0)
+            fileClient.uploadRangeWithResponse(options, null, null)
+        } catch (e: Exception) {
+            logger.error("Failed to write query log to Azure: ${e.message}")
         }
     }
 }

@@ -85,7 +85,10 @@ resource "azurerm_linux_web_app" "app" {
 
   lifecycle {
     ignore_changes = [
-      site_config[0].application_stack[0].docker_image_name
+      site_config[0].application_stack[0].docker_image_name,
+      app_settings["APP_VERSION_NAME"],
+      app_settings["APP_VERSION_CODE"],
+      app_settings["AZURE_LOG_FILENAME"]
     ]
   }
 }
