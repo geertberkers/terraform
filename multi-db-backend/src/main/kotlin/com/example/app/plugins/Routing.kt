@@ -41,6 +41,10 @@ fun Application.configureRouting() {
                             <div class="value">$dockerTag</div>
                         </div>
                         <div class="info">
+                            <div class="label">Build Code:</div>
+                            <div class="value">${System.getenv("APP_VERSION_CODE") ?: "0"}</div>
+                        </div>
+                        <div class="info">
                             <div class="label">Started at:</div>
                             <div class="value">$timestamp</div>
                         </div>

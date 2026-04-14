@@ -7,6 +7,7 @@ plugins {
 
 group = "com.example"
 version = "1.0.0"
+val versionCode = 100
 
 repositories {
     mavenCentral()
