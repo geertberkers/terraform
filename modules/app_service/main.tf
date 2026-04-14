@@ -17,12 +17,6 @@ resource "azurerm_service_plan" "asp" {
   sku_name            = "B2"
 }
 
-resource "azurerm_user_assigned_identity" "app_identity" {
-  name                = "${var.name_prefix}-identity"
-  location            = azurerm_resource_group.app_rg.location
-  resource_group_name = azurerm_resource_group.app_rg.name
-}
-
 resource "azurerm_linux_web_app" "app" {
   name                = "${var.name_prefix}-app"
   location            = azurerm_resource_group.app_rg.location
@@ -31,7 +25,7 @@ resource "azurerm_linux_web_app" "app" {
 
   identity {
     type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.app_identity.id]
+    identity_ids = [var.app_identity_id]
   }
 
   site_config {
@@ -74,7 +68,7 @@ resource "azurerm_linux_web_app" "app" {
     "COSMOS_CONNECTION_STRING" = var.cosmos_connection_secret_uri != "" ? "@Microsoft.KeyVault(SecretUri=${var.cosmos_connection_secret_uri})" : ""
 
     # Use managed identity for authentication (for databases, not logging)
-    "AZURE_CLIENT_ID" = azurerm_user_assigned_identity.app_identity.client_id
+    "AZURE_CLIENT_ID" = var.app_identity_client_id
 
     # Azure Storage for logging (using access key instead of managed identity)
     "AZURE_STORAGE_ACCOUNT" = var.azure_storage_account

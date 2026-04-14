@@ -132,3 +132,21 @@ variable "azure_storage_key" {
   default     = ""
   sensitive   = true
 }
+
+variable "app_identity_id" {
+  type        = string
+  description = "The ID of the User Assigned Identity"
+  default     = ""
+}
+
+variable "app_identity_client_id" {
+  type        = string
+  description = "The Client ID of the User Assigned Identity"
+  default     = ""
+}
+
+variable "app_identity_principal_id" {
+  type        = string
+  description = "The Principal ID of the User Assigned Identity"
+  default     = ""
+}

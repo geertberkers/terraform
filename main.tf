@@ -68,6 +68,15 @@ module "sweden" {
 }
 
 # =========================
+# MANAGED IDENTITY
+# =========================
+resource "azurerm_user_assigned_identity" "app_identity" {
+  name                = "my-web-service-identity"
+  location            = "westeurope"
+  resource_group_name = "rg-terraform-app-service-westeurope"
+}
+
+# =========================
 # APP SERVICE
 # =========================
 module "app_service" {
@@ -75,6 +84,10 @@ module "app_service" {
   resource_group_name = "rg-terraform-app-service-westeurope"
   location            = "westeurope"
   name_prefix         = "my-web-service"
+
+  app_identity_id           = azurerm_user_assigned_identity.app_identity.id
+  app_identity_client_id     = azurerm_user_assigned_identity.app_identity.client_id
+  app_identity_principal_id  = azurerm_user_assigned_identity.app_identity.principal_id
 
   postgres_fqdn     = module.databases.postgres_fqdn
   postgres_user     = module.databases.postgres_user
@@ -110,7 +123,7 @@ module "app_service" {
 module "logging" {
   source = "./modules/logging"
 
-  resource_group_name = module.app_service.resource_group_name
+  resource_group_name = "rg-terraform-app-service-westeurope"
   location            = "westeurope"
   name_prefix         = "app"
 }
@@ -122,7 +135,7 @@ module "dns" {
   source = "./modules/dns"
 
   zone_name           = var.dns_zone_name
-  resource_group_name = module.app_service.resource_group_name
+  resource_group_name = "rg-terraform-app-service-westeurope"
   subdomain_name      = var.dns_subdomain
   custom_domain_name  = var.custom_domain_name
   app_hostname        = module.app_service.default_hostname
@@ -143,7 +156,7 @@ module "databases" {
   sql_admin_user   = var.sql_admin_user
   pg_admin_user    = var.pg_admin_user
 
-  app_identity_principal_id = module.app_service.app_identity_principal_id
+  app_identity_principal_id = azurerm_user_assigned_identity.app_identity.principal_id
 
   sql_database_name = var.sql_database_name
 }

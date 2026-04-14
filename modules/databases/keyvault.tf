@@ -25,6 +25,19 @@ resource "azurerm_key_vault" "kv" {
   }
 }
 
+resource "azurerm_key_vault_access_policy" "app_policy" {
+  key_vault_id = azurerm_key_vault.kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = var.app_identity_principal_id
+
+  secret_permissions = [
+    "Get", "List"
+  ]
+
+  # Don't create policy if principal_id is empty
+  count = var.app_identity_principal_id != "" ? 1 : 0
+}
+
 resource "random_password" "mysql_admin" {
   length           = 16
   special          = true
