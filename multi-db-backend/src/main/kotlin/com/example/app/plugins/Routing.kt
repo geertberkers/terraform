@@ -21,13 +21,12 @@ val versionName: String
 val versionCode: String
     get() = System.getenv("APP_VERSION_CODE") ?: "unknown"
 
+val applicationStartTime: java.time.LocalDateTime = java.time.LocalDateTime.now()
 
 fun Application.configureRouting() {
     routing {
         // Root endpoint - show deployment info
         get("/") {
-            val timestamp = java.time.LocalDateTime.now()
-
             val html = """
                 <!DOCTYPE html>
                 <html>
@@ -67,7 +66,7 @@ fun Application.configureRouting() {
                         </div>
                         <div class="info">
                             <div class="label">Started at:</div>
-                            <div class="value">$timestamp</div>
+                            <div class="value">$applicationStartTime</div>
                         </div>
                         <hr>
                         <p>
