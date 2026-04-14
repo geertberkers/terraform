@@ -73,6 +73,17 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       # =========================
+      # Cache Terraform
+      # =========================
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: .terraform
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-
+
+      # =========================
       # Terraform Init
       # =========================
       - name: Terraform Init
