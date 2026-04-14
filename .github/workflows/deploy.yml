@@ -93,14 +93,33 @@ jobs:
           # Debug Info
           echo "Successfully parsed Version: $VERSION and Build Code: $VERSION_CODE"
 
-      - name: Set App Settings via CLI
-        run: |
-          az webapp config appsettings set --name ${{ secrets.AZURE_WEBAPP_NAME }} \
-            --resource-group rg-terraform-app-service-westeurope \
-            --settings AZURE_LOG_FILENAME="app-${{ steps.timestamp.outputs.timestamp }}.log" \
-                       APP_VERSION_NAME="${{ steps.project_version.outputs.version }}" \
-                       APP_VERSION_CODE="${{ steps.project_version.outputs.versionCode }}" \
-                       DOCKER_TAG="${{ github.sha }}"
+      - name: Set App Settings
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          app-settings-json: |
+            [
+              {
+                "name": "DOCKER_TAG",
+                "value": "${{ github.sha }}",
+                "slotSetting": false
+              },
+              {
+                "name": "AZURE_LOG_FILENAME",
+                "value": "app-${{ steps.timestamp.outputs.timestamp }}.log",
+                "slotSetting": false
+              },
+              {
+                "name": "APP_VERSION_NAME",
+                "value": "${{ steps.project_version.outputs.version }}",
+                "slotSetting": false
+              },
+              {
+                "name": "APP_VERSION_CODE",
+                "value": "${{ steps.project_version.outputs.versionCode }}",
+                "slotSetting": false
+              }
+            ]
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
