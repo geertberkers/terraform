@@ -165,6 +165,7 @@ module "databases" {
   pg_admin_user    = var.pg_admin_user
 
   app_identity_principal_id = azurerm_user_assigned_identity.app_identity.principal_id
+  app_identity_name         = azurerm_user_assigned_identity.app_identity.name
 
   sql_database_name = var.sql_database_name
 }

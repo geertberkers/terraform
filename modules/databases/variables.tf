@@ -31,3 +31,9 @@ variable "app_identity_principal_id" {
   description = "Principal ID of the managed identity for database access"
   default     = ""
 }
+
+variable "app_identity_name" {
+  type        = string
+  description = "Name of the managed identity for database access"
+  default     = ""
+}
