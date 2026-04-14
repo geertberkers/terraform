@@ -20,8 +20,12 @@ class DatabaseService {
         query: String,
         mapper: (java.sql.ResultSet) -> T
     ): List<T> {
+        logger.info("ACTION: executeQuery | DB: $dbType | QUERY: $query")
+        
         val dataSource = getDataSource(dbType)
-            ?: throw AppError.InvalidDatabase("Database type not configured: $dbType")
+            ?: throw AppError.InvalidDatabase("Database type not configured: $dbType").also {
+                logger.warn("RESULT: Failed - ${it.message}")
+            }
 
         return try {
             dataSource.connection.use { connection ->
@@ -31,11 +35,12 @@ class DatabaseService {
                     while (resultSet.next()) {
                         results.add(mapper(resultSet))
                     }
+                    logger.info("RESULT: Success | Retrieved ${results.size} row(s)")
                     results
                 }
             }
         } catch (e: Exception) {
-            logger.error("Query execution failed", e)
+            logger.error("RESULT: Error | Query execution failed: ${e.message}", e)
             throw AppError.DatabaseError("Failed to execute query: ${e.message}")
         }
     }
@@ -45,11 +50,15 @@ class DatabaseService {
         sql: String,
         params: List<Any> = emptyList()
     ): Int {
+        logger.info("ACTION: executeUpdate | DB: $dbType | SQL: $sql | PARAMS: $params")
+        
         val dataSource = getDataSource(dbType)
-            ?: throw AppError.InvalidDatabase("Database type not configured: $dbType")
+            ?: throw AppError.InvalidDatabase("Database type not configured: $dbType").also {
+                logger.warn("RESULT: Failed - ${it.message}")
+            }
 
         return try {
-            dataSource.connection.use { connection ->
+            val affectedRows = dataSource.connection.use { connection ->
                 connection.prepareStatement(sql).use { statement ->
                     params.forEachIndexed { index, param ->
                         when (param) {
@@ -64,8 +73,10 @@ class DatabaseService {
                     statement.executeUpdate()
                 }
             }
+            logger.info("RESULT: Success | Affected $affectedRows row(s)")
+            affectedRows
         } catch (e: Exception) {
-            logger.error("Update execution failed", e)
+            logger.error("RESULT: Error | Update execution failed: ${e.message}", e)
             throw AppError.DatabaseError("Failed to execute update: ${e.message}")
         }
     }
