@@ -350,11 +350,11 @@
                 drop: "IF OBJECT_ID('persons', 'U') IS NOT NULL DROP TABLE persons;"
             },
             cosmosdb: {
-                create: "-- CosmosDB: Create items via JSON\n{\"id\": \"1\", \"name\": \"Alice Smith\", \"email\": \"alice@example.com\"}",
-                insert: "-- CosmosDB: Upsert item\n{\"id\": \"2\", \"name\": \"Bob Jones\", \"email\": \"bob@example.com\"}",
+                create: "-- CosmosDB: Create Table (container managed by Terraform)\n{\"operation\": \"create\", \"entity\": \"persons\"}",
+                insert: "-- CosmosDB: Insert Person (upsert document)\n{\"id\": \"2\", \"name\": \"Bob Jones\", \"email\": \"bob@example.com\"}",
                 select: "SELECT * FROM c",
-                delete: "-- CosmosDB: Delete by id\n{\"id\": \"1\"}",
-                drop: "-- CosmosDB: Container management not supported via SQL"
+                delete: "-- CosmosDB: Delete Person by id\n{\"id\": \"2\"}",
+                drop: "-- CosmosDB: Drop Table (container retained)\n{\"operation\": \"drop\", \"entity\": \"persons\"}"
             }
         };
 

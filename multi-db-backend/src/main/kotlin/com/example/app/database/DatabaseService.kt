@@ -152,8 +152,21 @@ class DatabaseService {
         val container = getCosmosContainer()
 
         return try {
-            val payload = parsePayloadJson(rawPayload)
             val operationHint = rawPayload.trim().substringBefore("\n").lowercase()
+
+            // Cosmos container lifecycle is managed by Terraform in this project.
+            if (operationHint.contains("create table")) {
+                logger.info("RESULT: Success | Cosmos create table skipped (container already managed)")
+                logQueryToFile("CosmosDB", rawPayload, "Success | Create table skipped (managed by Terraform)")
+                return 1
+            }
+            if (operationHint.contains("drop table")) {
+                logger.info("RESULT: Success | Cosmos drop table skipped (container retained)")
+                logQueryToFile("CosmosDB", rawPayload, "Success | Drop table skipped (managed by Terraform)")
+                return 1
+            }
+
+            val payload = parsePayloadJson(rawPayload)
 
             if (operationHint.contains("delete")) {
                 val id = (payload["id"] as? JsonPrimitive)?.content
