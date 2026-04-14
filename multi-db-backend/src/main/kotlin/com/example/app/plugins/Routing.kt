@@ -11,11 +11,11 @@ fun Application.configureRouting() {
     routing {
         // Root endpoint - show deployment info
         get("/") {
+            val timestamp = java.time.LocalDateTime.now()
             val dockerImage = System.getenv("DOCKER_IMAGE") ?: "unknown"
             val dockerTag = System.getenv("DOCKER_TAG") ?: "unknown"
-            val timestamp = java.time.LocalDateTime.now()
-            val versionName: String = System.getenv("APP_VERSION_NAME") ?: "0.0.0"
-            val versionCode: String = System.getenv("APP_VERSION_CODE") ?: "0"
+            val versionName: String = System.getenv("APP_VERSION_NAME") ?: "unknown"
+            val versionCode: String = System.getenv("APP_VERSION_CODE") ?: "unknown"
 
             val html = """
                 <!DOCTYPE html>
