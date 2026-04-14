@@ -14,7 +14,9 @@ fun Application.configureRouting() {
             val dockerImage = System.getenv("DOCKER_IMAGE") ?: "unknown"
             val dockerTag = System.getenv("DOCKER_TAG") ?: "unknown"
             val timestamp = java.time.LocalDateTime.now()
-            
+            val versionName: String = System.getenv("APP_VERSION_NAME") ?: "0.0.0"
+            val versionCode: String = System.getenv("APP_VERSION_CODE") ?: "0"
+
             val html = """
                 <!DOCTYPE html>
                 <html>
@@ -42,11 +44,11 @@ fun Application.configureRouting() {
                         </div>
                         <div class="info">
                             <div class="label">App Version:</div>
-                            <div class="value">${System.getenv("APP_VERSION_NAME") ?: "unknown"}</div>
+                            <div class="value">$versionName</div>
                         </div>
                         <div class="info">
                             <div class="label">App Build Code:</div>
-                            <div class="value">${System.getenv("APP_VERSION_CODE") ?: "0"}</div>
+                            <div class="value">$versionCode</div>
                         </div>
                         <div class="info">
                             <div class="label">Kotlin Version:</div>
