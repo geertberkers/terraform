@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import com.azure.storage.file.share.ShareClientBuilder
 import com.azure.storage.common.StorageSharedKeyCredential
+import com.azure.storage.file.share.models.ShareFileUploadRangeOptions
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 
@@ -88,7 +89,7 @@ class AzureFileLogger(
             if (!fileClient.exists()) {
                 fileClient.create(1024 * 1024) // 1MB initial size
             } else {
-                offset = fileClient.properties.fileSize
+                offset = fileClient.getProperties().getContentLength()
                 // If file is getting too large (e.g. > 1MB), we might want to rotate it
                 // but for now we just append
                 if (offset + data.size > 1024 * 1024) {
@@ -99,7 +100,9 @@ class AzureFileLogger(
                 }
             }
 
-            fileClient.uploadRange(ByteArrayInputStream(data), offset, data.size.toLong())
+            val options = ShareFileUploadRangeOptions(ByteArrayInputStream(data), data.size.toLong())
+                .setOffset(offset)
+            fileClient.uploadRangeWithResponse(options, null, null)
             
         } catch (e: Exception) {
             // Fallback to console if Azure logging fails
