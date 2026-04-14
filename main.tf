@@ -86,8 +86,8 @@ module "app_service" {
   name_prefix         = "my-web-service"
 
   app_identity_id           = azurerm_user_assigned_identity.app_identity.id
-  app_identity_client_id     = azurerm_user_assigned_identity.app_identity.client_id
-  app_identity_principal_id  = azurerm_user_assigned_identity.app_identity.principal_id
+  app_identity_client_id    = azurerm_user_assigned_identity.app_identity.client_id
+  app_identity_principal_id = azurerm_user_assigned_identity.app_identity.principal_id
 
   postgres_fqdn     = module.databases.postgres_fqdn
   postgres_user     = module.databases.postgres_user
