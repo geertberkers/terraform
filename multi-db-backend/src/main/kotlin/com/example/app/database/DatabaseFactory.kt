@@ -78,7 +78,11 @@ object DatabaseFactory {
         val postgresDb = System.getenv("POSTGRES_DB") ?: "appdb"
         val postgresUser = System.getenv("POSTGRES_USER") ?: "postgres"
 
-        logger.info("PostgreSQL config: host=$postgresHost, port=$postgresPort, db=$postgresDb, user=$postgresUser")
+        logger.info("PostgreSQL config:")
+        logger.info("    host=$postgresHost")
+        logger.info("    port=$postgresPort")
+        logger.info("    db=$postgresDb")
+        logger.info("    user=$postgresUser")
 
         val config = HikariConfig().apply {
             driverClassName = "org.postgresql.Driver"
@@ -112,7 +116,11 @@ object DatabaseFactory {
         val mysqlDb = System.getenv("MYSQL_DB") ?: "appdb"
         val mysqlUser = System.getenv("MYSQL_USER") ?: "root"
 
-        logger.info("MySQL config: host=$mysqlHost, port=$mysqlPort, db=$mysqlDb, user=$mysqlUser")
+        logger.info("MySQL config:")
+        logger.info("    host=$mysqlHost")
+        logger.info("    port=$mysqlPort")
+        logger.info("    db=$mysqlDb")
+        logger.info("    user=$mysqlUser")
 
         val config = HikariConfig().apply {
             driverClassName = "com.mysql.cj.jdbc.Driver"
@@ -134,7 +142,11 @@ object DatabaseFactory {
         val sqlDb = System.getenv("SQLSERVER_DB") ?: "master"
         val sqlUser = System.getenv("SQLSERVER_USER") ?: "sa"
 
-        logger.info("SQL Server config: host=$sqlHost, port=$sqlPort, db=$sqlDb, user=$sqlUser")
+        logger.info("SQL Server config:")
+        logger.info("    host=$sqlHost")
+        logger.info("    port=$sqlPort")
+        logger.info("    db=$sqlDb")
+        logger.info("    user=$sqlUser")
 
         val config = HikariConfig().apply {
             driverClassName = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
