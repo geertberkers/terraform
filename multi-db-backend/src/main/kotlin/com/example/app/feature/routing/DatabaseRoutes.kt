@@ -66,6 +66,52 @@ fun Route.databaseRoutes() {
                 message = "Successfully executed. Affected rows: $affectedRows"
             ))
         }
+
+        // Example query to show some real data
+        get("/example-data") {
+            val results = mutableMapOf<String, Any>()
+
+            // Try to get a basic check from Postgres
+             try {
+                val pgResult = dbService.executeQuery(DatabaseType.PostgreSQL, "SELECT 1 as is_alive, version() as db_version") { rs ->
+                    mapOf(
+                        "is_alive" to rs.getObject("is_alive")?.toString(),
+                        "db_version" to rs.getObject("db_version")?.toString()
+                    )
+                }
+                results["postgres"] = if (pgResult.isNotEmpty()) pgResult[0] else "No data"
+            } catch (e: Exception) {
+                results["postgres"] = "Error connecting/querying: ${e.message}"
+            }
+
+            // Try MySQL
+            try {
+                val mysqlResult = dbService.executeQuery(DatabaseType.MySQL, "SELECT 1 as is_alive, version() as db_version") { rs ->
+                    mapOf(
+                        "is_alive" to rs.getObject("is_alive")?.toString(),
+                        "db_version" to rs.getObject("db_version")?.toString()
+                    )
+                }
+                results["mysql"] = if (mysqlResult.isNotEmpty()) mysqlResult[0] else "No data"
+            } catch (e: Exception) {
+                results["mysql"] = "Error connecting/querying: ${e.message}"
+            }
+
+            // Try SQL Server
+            try {
+                val sqlResult = dbService.executeQuery(DatabaseType.SQLServer, "SELECT 1 as is_alive, @@VERSION as db_version") { rs ->
+                    mapOf(
+                        "is_alive" to rs.getObject("is_alive")?.toString(),
+                        "db_version" to rs.getObject("db_version")?.toString()
+                    )
+                }
+                results["sqlserver"] = if (sqlResult.isNotEmpty()) sqlResult[0] else "No data"
+            } catch (e: Exception) {
+                results["sqlserver"] = "Error connecting/querying: ${e.message}"
+            }
+
+            call.respond(mapOf("example_data" to results))
+        }
     }
 }
 

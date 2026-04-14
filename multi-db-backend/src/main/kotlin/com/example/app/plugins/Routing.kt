@@ -57,7 +57,11 @@ fun Application.configureRouting() {
                             <div class="value">$timestamp</div>
                         </div>
                         <hr>
-                        <p><a href="/health">Health Check</a> | <a href="/dashboard">Dashboard</a></p>
+                        <p>
+                            <a href="/health">Health Check</a> | 
+                            <a href="/dashboard">Dashboard</a> | 
+                            <a href="/api/database/example-data">Example Data Query</a>
+                        </p>
                     </div>
                 </body>
                 </html>

@@ -244,6 +244,19 @@
         </header>
 
         <div class="main-grid">
+            <!-- Connection Status -->
+            <div class="panel" style="grid-column: 1 / -1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #667eea; margin-bottom: 20px; padding-bottom: 10px;">
+                    <h2 style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">🟢 Connection Status</h2>
+                    <button type="button" onclick="checkConnections()" style="padding: 8px 15px;">🔄 Refresh</button>
+                </div>
+                <div id="connectionStatusContainer" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px; padding: 15px; background: #f5f5f5; border-radius: 4px;">
+                        Loading status...
+                    </div>
+                </div>
+            </div>
+
             <!-- Database Selector -->
             <div class="panel">
                 <h2>📊 Databases</h2>
@@ -434,10 +447,42 @@
             return div.innerHTML;
         }
 
-        // Auto-select first database
+        async function checkConnections() {
+            const container = document.getElementById('connectionStatusContainer');
+            container.innerHTML = '<div style="flex: 1; padding: 15px; background: #f5f5f5; border-radius: 4px;">Testing connections... <div class="spinner" style="vertical-align: middle; width: 15px; height: 15px; border-width: 2px;"></div></div>';
+            
+            try {
+                const response = await fetch('/api/database/example-data');
+                if (!response.ok) throw new Error('Failed to fetch connection status');
+                const result = await response.json();
+                const data = result.example_data;
+                
+                let html = '';
+                for (const [db, status] of Object.entries(data)) {
+                    const isHealthy = typeof status === 'object' && status !== null && status.is_alive == '1';
+                    const bgColor = isHealthy ? '#e8f5e9' : '#fee';
+                    const color = isHealthy ? '#2e7d32' : '#c33';
+                    const icon = isHealthy ? '✅' : '❌';
+                    const detail = isHealthy ? status.db_version : status;
+                    
+                    html += `
+                        <div style="flex: 1; min-width: 250px; padding: 15px; background: ${bgColor}; border-left: 4px solid ${color}; border-radius: 4px;">
+                            <h3 style="color: ${color}; margin-bottom: 8px; font-size: 16px;">${icon} ${db.toUpperCase()}</h3>
+                            <p style="font-size: 12px; color: #666; word-break: break-all;">${typeof detail === 'string' ? escapeHtml(detail) : escapeHtml(JSON.stringify(detail))}</p>
+                        </div>
+                    `;
+                }
+                container.innerHTML = html;
+            } catch (err) {
+                container.innerHTML = `<div style="color: #c33; padding: 15px;">Failed to load connection status: ${escapeHtml(err.message)}</div>`;
+            }
+        }
+
+        // Auto-select first database and load status
         window.addEventListener('load', () => {
             const first = document.querySelector('.database-list li');
             if (first) first.click();
+            checkConnections();
         });
         </#noparse>
     </script>
