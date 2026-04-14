@@ -28,6 +28,8 @@ resource "azurerm_linux_web_app" "app" {
     identity_ids = [var.app_identity_id]
   }
 
+  key_vault_reference_identity_id = var.app_identity_id
+
   site_config {
     always_on = true
 
