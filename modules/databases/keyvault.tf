@@ -33,9 +33,6 @@ resource "azurerm_key_vault_access_policy" "app_policy" {
   secret_permissions = [
     "Get", "List"
   ]
-
-  # Don't create policy if principal_id is empty
-  count = var.app_identity_principal_id != "" ? 1 : 0
 }
 
 resource "random_password" "mysql_admin" {
