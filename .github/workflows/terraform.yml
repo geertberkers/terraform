@@ -43,6 +43,28 @@ jobs:
         uses: actions/checkout@v4
 
       # =========================
+      # Setup sqlcmd (cached)
+      # =========================
+      - name: Cache go-sqlcmd
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: cache-sqlcmd
+        uses: actions/cache@v4
+        with:
+          path: ~/bin/sqlcmd
+          key: ${{ runner.os }}-sqlcmd-v1.6.0
+
+      - name: Install go-sqlcmd
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.cache-sqlcmd.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/bin
+          curl -L https://github.com/microsoft/go-sqlcmd/releases/download/v1.6.0/sqlcmd-v1.6.0-linux-x64.tar.bz2 | tar -xj -C ~/bin
+          chmod +x ~/bin/sqlcmd
+
+      - name: Add sqlcmd to PATH
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: echo "$HOME/bin" >> $GITHUB_PATH
+
+      # =========================
       # Setup Terraform
       # =========================
       - name: Setup Terraform
@@ -78,27 +100,6 @@ jobs:
             -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
             -out=tfplan
 
-      # =========================
-      # Setup sqlcmd (cached)
-      # =========================
-      - name: Cache go-sqlcmd
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        id: cache-sqlcmd
-        uses: actions/cache@v4
-        with:
-          path: ~/bin/sqlcmd
-          key: ${{ runner.os }}-sqlcmd-v1.6.0
-
-      - name: Install go-sqlcmd
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.cache-sqlcmd.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p ~/bin
-          curl -L https://github.com/microsoft/go-sqlcmd/releases/download/v1.6.0/sqlcmd-v1.6.0-linux-x64.tar.bz2 | tar -xj -C ~/bin
-          chmod +x ~/bin/sqlcmd
-
-      - name: Add sqlcmd to PATH
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: echo "$HOME/bin" >> $GITHUB_PATH
 
       # =========================
       # Apply ONLY on main branch push
