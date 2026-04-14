@@ -29,7 +29,6 @@ jobs:
       contents: read
 
     steps:
-
       # =========================
       # Checkout
       # =========================
@@ -51,6 +50,15 @@ jobs:
         run: terraform init -reconfigure -input=false -lock-timeout=10m
 
       # =========================
+      # IMPORT KEY VAULT ACCESS POLICY
+      # =========================
+      - name: Import Key Vault Access Policy
+        run: |
+          terraform import \
+            module.databases.azurerm_key_vault_access_policy.current_user_policy \
+            "/subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-databases-europe/providers/Microsoft.KeyVault/vaults/kv-db-global-cc68e9b577/objectId/0f0b3a83-68d0-49bf-bcde-6d57ac1dccf5"
+
+      # =========================
       # IMPORT Hostname Binding
       # =========================
       - name: Import Hostname Binding
@@ -62,12 +70,12 @@ jobs:
           terraform import \
             module.dns.azurerm_dns_zone.zone \
             "/subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-app-service-westeurope/providers/Microsoft.Network/dnsZones/gb-coding.nl"
-     
+
           terraform import \
             'module.app_service.azurerm_app_service_custom_hostname_binding.custom_hostname["azure.gb-coding.nl"]' \
             "/subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-app-service-westeurope/providers/Microsoft.Web/sites/my-web-service-app/hostNameBindings/azure.gb-coding.nl"
 
-     # =========================
+      # =========================
       # IMPORT DATABASES
       # =========================
       - name: Import Databases
