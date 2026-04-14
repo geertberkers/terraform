@@ -44,6 +44,9 @@ fun Application.configureRouting() {
                             <div class="label">App Version:</div>
                             <div class="value">${System.getenv("APP_VERSION_NAME") ?: "unknown"} (Build: ${System.getenv("APP_VERSION_CODE") ?: "0"})</div>
                         </div>
+                        <div class="label">App Build Code:</div>
+                            <div class="value">${System.getenv("APP_VERSION_CODE") ?: "0"}
+                        </div>
                         <div class="info">
                             <div class="label">Kotlin Version:</div>
                             <div class="value">${KotlinVersion.CURRENT}</div>
