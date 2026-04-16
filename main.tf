@@ -82,13 +82,61 @@ resource "azurerm_user_assigned_identity" "app_identity" {
 }
 
 # =========================
-# APP SERVICE
+# APP SERVICE (PAID TIER)
 # =========================
 module "app_service" {
   source              = "./modules/app_service"
   resource_group_name = "rg-terraform-app-service-westeurope"
   location            = "westeurope"
   name_prefix         = "my-web-service"
+  service_plan_sku    = "B1"  # Basic tier
+
+  app_identity_id           = azurerm_user_assigned_identity.app_identity.id
+  app_identity_client_id    = azurerm_user_assigned_identity.app_identity.client_id
+  app_identity_principal_id = azurerm_user_assigned_identity.app_identity.principal_id
+  app_identity_name         = azurerm_user_assigned_identity.app_identity.name
+
+  docker_image_tag = var.docker_image_tag
+  app_version_name = var.app_version_name
+  app_version_code = var.app_version_code
+
+  postgres_fqdn     = module.databases.postgres_fqdn
+  postgres_user     = module.databases.postgres_user
+  postgres_password = module.databases.postgres_password
+  postgres_db       = module.databases.postgres_db
+
+  mysql_fqdn     = module.databases.mysql_fqdn
+  mysql_user     = module.databases.mysql_user
+  mysql_password = module.databases.mysql_password
+  mysql_db       = module.databases.mysql_db
+
+  sql_server_fqdn     = module.databases.sql_server_fqdn
+  sql_server_user     = module.databases.sql_server_user
+  sql_server_password = module.databases.sql_server_password
+  sql_server_db       = module.databases.sql_server_db
+
+  cosmos_endpoint = module.databases.cosmos_endpoint
+
+  # Key Vault Secret URIs for App Service (Secure references)
+  postgres_password_secret_uri   = module.databases.postgres_password_secret_uri
+  mysql_password_secret_uri      = module.databases.mysql_password_secret_uri
+  sql_server_password_secret_uri = module.databases.sql_server_password_secret_uri
+  cosmos_connection_secret_uri   = module.databases.cosmos_connection_secret_uri
+
+  azure_storage_account = module.logging.storage_account_name
+  azure_file_share      = module.logging.file_share_name
+  azure_storage_key     = module.logging.storage_account_primary_access_key
+}
+
+# =========================
+# APP SERVICE (FREE TIER)
+# =========================
+module "app_service_free" {
+  source              = "./modules/app_service"
+  resource_group_name = "rg-terraform-app-service-free-westeurope"
+  location            = "westeurope"
+  name_prefix         = "free-web-service"
+  service_plan_sku    = "F1"  # Free tier
 
   app_identity_id           = azurerm_user_assigned_identity.app_identity.id
   app_identity_client_id    = azurerm_user_assigned_identity.app_identity.client_id
@@ -148,8 +196,18 @@ module "dns" {
   resource_group_name = "rg-terraform-app-service-westeurope"
   subdomain_name      = var.dns_subdomain
   custom_domain_name  = var.custom_domain_name
-  app_hostname        = module.app_service.default_hostname
-  app_service_name    = module.app_service.app_name
+# =========================
+# DNS (FREE TIER)
+# =========================
+module "dns_free" {
+  source = "./modules/dns"
+
+  zone_name           = var.dns_zone_name
+  resource_group_name = "rg-terraform-app-service-free-westeurope"
+  subdomain_name      = "free"  # Separate subdomain for free tier
+  custom_domain_name  = "free.${var.dns_zone_name}"
+  app_hostname        = module.app_service_free.default_hostname
+  app_service_name    = module.app_service_free.app_name
 }
 
 # =========================

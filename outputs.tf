@@ -24,8 +24,18 @@ output "app_hostname" {
   value = module.app_service.default_hostname
 }
 
+output "app_hostname_free" {
+  value       = module.app_service_free.default_hostname
+  description = "Free tier App Service hostname"
+}
+
 output "custom_domain_fqdn" {
   value = module.dns.cname_fqdn
+}
+
+output "custom_domain_fqdn_free" {
+  value       = module.dns_free.cname_fqdn
+  description = "Free tier custom domain FQDN"
 }
 
 output "ssl_certificate_binding_id" {
@@ -58,6 +68,11 @@ output "sweden_ssh_commands" {
 # =========================
 # KUBERNETES CLUSTER
 # =========================
+output "aks_resource_group" {
+  value       = module.aks_cheap.resource_group_name
+  description = "Resource group containing the AKS cluster"
+}
+
 output "aks_cluster_name" {
   value       = module.aks_cheap.cluster_name
   description = "Name of the AKS cluster"

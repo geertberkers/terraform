@@ -173,3 +173,9 @@ variable "app_version_code" {
   description = "Application version/build code"
   default     = "unknown"
 }
+
+variable "service_plan_sku" {
+  type        = string
+  description = "The SKU for the App Service Plan (e.g., F1 for Free, B1 for Basic)"
+  default     = "B1"
+}
