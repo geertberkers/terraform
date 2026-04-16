@@ -82,6 +82,19 @@ resource "azurerm_user_assigned_identity" "app_identity" {
 }
 
 # =========================
+# RESOURCE GROUPS
+# =========================
+resource "azurerm_resource_group" "app_service_free_rg" {
+  name     = "rg-terraform-app-service-free-westeurope"
+  location = "westeurope"
+}
+
+resource "azurerm_resource_group" "aks_cheap_rg" {
+  name     = "rg-terraform-aks-cheap"
+  location = "westeurope"
+}
+
+# =========================
 # APP SERVICE (PAID TIER)
 # =========================
 module "app_service" {
@@ -207,11 +220,13 @@ module "dns_free" {
   source = "./modules/dns"
 
   zone_name           = var.dns_zone_name
-  resource_group_name = "rg-terraform-app-service-free-westeurope"
+  resource_group_name = azurerm_resource_group.app_service_free_rg.name
   subdomain_name      = "free" # Separate subdomain for free tier
   custom_domain_name  = "free.${var.dns_zone_name}"
   app_hostname        = module.app_service_free.default_hostname
   app_service_name    = module.app_service_free.app_name
+
+  depends_on = [azurerm_resource_group.app_service_free_rg]
 }
 
 # =========================
@@ -240,9 +255,11 @@ module "databases" {
 # =========================
 module "aks_cheap" {
   source              = "./modules/aks"
-  resource_group_name = "rg-terraform-aks-cheap"
+  resource_group_name = azurerm_resource_group.aks_cheap_rg.name
   location            = "westeurope"
   name_prefix         = "cheap-k8s"
+
+  depends_on = [azurerm_resource_group.aks_cheap_rg]
 }
 
 
