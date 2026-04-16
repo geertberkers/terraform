@@ -33,3 +33,9 @@ variable "ttl" {
   description = "Time to live for the DNS record"
   default     = 300
 }
+
+variable "domain_verification_value" {
+  type        = string
+  description = "The domain verification value for custom domain binding"
+  default     = ""
+}
