@@ -241,7 +241,6 @@ module "dns_free" {
   custom_domain_name        = "free.${var.dns_zone_name}"
   app_hostname              = module.app_service_free.default_hostname
   app_service_name          = module.app_service_free.app_name
-  domain_verification_value = "601cc3e67399002c0fe3e5b9688bb2cf67ceaaf7accf07ca47bcaad1e988200e"
 
   depends_on = [azurerm_resource_group.app_service_free_rg, azurerm_dns_zone.main]
 }
