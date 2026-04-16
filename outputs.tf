@@ -54,3 +54,17 @@ output "sweden_public_ip" {
 output "sweden_ssh_commands" {
   value = module.sweden.ssh_commands
 }
+
+# =========================
+# KUBERNETES CLUSTER
+# =========================
+output "aks_cluster_name" {
+  value       = module.aks_cheap.cluster_name
+  description = "Name of the AKS cluster"
+}
+
+output "aks_kube_config" {
+  value       = module.aks_cheap.kube_config_raw
+  sensitive   = true
+  description = "Raw Kubernetes configuration for cluster access"
+}

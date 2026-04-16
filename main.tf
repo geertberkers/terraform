@@ -172,6 +172,18 @@ module "databases" {
   sql_database_name = var.sql_database_name
 }
 
+
+# =========================
+# KUBERNETES CLUSTER (CHEAP DEPLOYMENT)
+# =========================
+module "aks_cheap" {
+  source              = "./modules/aks"
+  resource_group_name = "rg-terraform-aks-cheap"
+  location            = "germanywestcentral"
+  name_prefix         = "cheap-k8s"
+}
+
+
 # =========================
 # APP HOSTING EXAMPLES
 # =========================
