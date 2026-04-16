@@ -196,6 +196,7 @@ module "dns" {
   resource_group_name = "rg-terraform-app-service-westeurope"
   subdomain_name      = var.dns_subdomain
   custom_domain_name  = var.custom_domain_name
+}
 # =========================
 # DNS (FREE TIER)
 # =========================
