@@ -89,7 +89,7 @@ module "app_service" {
   resource_group_name = "rg-terraform-app-service-westeurope"
   location            = "westeurope"
   name_prefix         = "my-web-service"
-  service_plan_sku    = "B1"  # Basic tier
+  service_plan_sku    = "B1" # Basic tier
 
   app_identity_id           = azurerm_user_assigned_identity.app_identity.id
   app_identity_client_id    = azurerm_user_assigned_identity.app_identity.client_id
@@ -136,7 +136,7 @@ module "app_service_free" {
   resource_group_name = "rg-terraform-app-service-free-westeurope"
   location            = "westeurope"
   name_prefix         = "free-web-service"
-  service_plan_sku    = "F1"  # Free tier
+  service_plan_sku    = "F1" # Free tier
 
   app_identity_id           = azurerm_user_assigned_identity.app_identity.id
   app_identity_client_id    = azurerm_user_assigned_identity.app_identity.client_id
@@ -205,7 +205,7 @@ module "dns_free" {
 
   zone_name           = var.dns_zone_name
   resource_group_name = "rg-terraform-app-service-free-westeurope"
-  subdomain_name      = "free"  # Separate subdomain for free tier
+  subdomain_name      = "free" # Separate subdomain for free tier
   custom_domain_name  = "free.${var.dns_zone_name}"
   app_hostname        = module.app_service_free.default_hostname
   app_service_name    = module.app_service_free.app_name
