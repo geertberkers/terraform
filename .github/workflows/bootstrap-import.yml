@@ -56,7 +56,7 @@ jobs:
         run: |
           terraform import \
             module.databases.azurerm_key_vault_access_policy.current_user_policy \
-            "/subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-databases-europe/providers/Microsoft.KeyVault/vaults/kv-db-global-cc68e9b577/objectId/0f0b3a83-68d0-49bf-bcde-6d57ac1dccf5"
+            "/subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-databases-europe/providers/Microsoft.KeyVault/vaults/kv-db-global-cc68e9b577/objectId/0f0b3a83-68d0-49bf-bcde-6d57ac1dccf5" || true
 
       # =========================
       # IMPORT Hostname Binding
@@ -65,15 +65,15 @@ jobs:
         run: |
           terraform import \
             module.dns.azurerm_app_service_managed_certificate.managed_cert \
-            "/subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-app-service-westeurope/providers/Microsoft.Web/certificates/azure.gb-coding.nl"
+            "/subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-app-service-westeurope/providers/Microsoft.Web/certificates/azure.gb-coding.nl" || true
 
           terraform import \
             module.dns.azurerm_dns_zone.zone \
-            "/subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-app-service-westeurope/providers/Microsoft.Network/dnsZones/gb-coding.nl"
+            "/subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-app-service-westeurope/providers/Microsoft.Network/dnsZones/gb-coding.nl" || true
 
           terraform import \
             'module.app_service.azurerm_app_service_custom_hostname_binding.custom_hostname["azure.gb-coding.nl"]' \
-            "/subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-app-service-westeurope/providers/Microsoft.Web/sites/my-web-service-app/hostNameBindings/azure.gb-coding.nl"
+            "/subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-app-service-westeurope/providers/Microsoft.Web/sites/my-web-service-app/hostNameBindings/azure.gb-coding.nl" || true
 
       # =========================
       # IMPORT DATABASES
@@ -81,19 +81,24 @@ jobs:
       - name: Import Databases
         run: |
           terraform import module.databases.azurerm_cosmosdb_account.cosmos \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-databases-europe/providers/Microsoft.DocumentDB/databaseAccounts/cosmos-global
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-databases-europe/providers/Microsoft.DocumentDB/databaseAccounts/cosmos-global || true
 
           terraform import module.databases.azurerm_mysql_flexible_server.mysql \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-databases-europe/providers/Microsoft.DBforMySQL/flexibleServers/mysql-global
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-databases-europe/providers/Microsoft.DBforMySQL/flexibleServers/mysql-global || true
 
           terraform import module.databases.azurerm_postgresql_flexible_server.postgres \
-            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-databases-europe/providers/Microsoft.DBforPostgreSQL/flexibleServers/pg-global
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-databases-europe/providers/Microsoft.DBforPostgreSQL/flexibleServers/pg-global || true
 
       # =========================
       # IMPORT RESOURCE GROUPS
       # =========================
       - name: Import Resource Groups
         run: |
+          terraform import azurerm_resource_group.app_service_free_rg \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-app-service-free-westeurope || true
+
+          terraform import azurerm_resource_group.aks_cheap_rg \
+            /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-aks-cheap || true
 
           terraform import module.switzerland.azurerm_resource_group.rg \
             /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/rg-terraform-switzerland-north || true
