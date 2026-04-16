@@ -27,6 +27,17 @@ sealed class DatabaseType {
 class DatabaseService {
     private val json = Json { ignoreUnknownKeys = true }
 
+    private fun toJsonString(value: String): String {
+        // Minimal JSON escaping for query log JSON.
+        val escaped = value
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t")
+        return "\"$escaped\""
+    }
+
     fun <T> executeQuery(
         dbType: DatabaseType,
         query: String,
@@ -294,15 +305,26 @@ class DatabaseService {
         val accountName = System.getenv("AZURE_STORAGE_ACCOUNT")
         val accountKey = System.getenv("AZURE_STORAGE_KEY")
         val shareName = System.getenv("AZURE_FILE_SHARE") ?: "logs"
-        val directoryName = System.getenv("AZURE_LOG_DIRECTORY") ?: "app-logs"
+        val baseLogDirectory = System.getenv("AZURE_LOG_DIRECTORY") ?: "app-logs"
         
         if (accountKey.isNullOrEmpty() || accountName.isNullOrEmpty()) return
 
-        val timestampSafe = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"))
-        val specificFileName = "query_${dbName}_${timestampSafe}.log"
+        val now = java.time.LocalDateTime.now()
+        val year = now.year.toString()
+        val month = now.monthValue.toString().padStart(2, '0')
+        val day = now.dayOfMonth.toString().padStart(2, '0')
+        val timePart = now.format(java.time.format.DateTimeFormatter.ofPattern("HHmmss_SSS"))
+        val specificFileName = "${timePart}.json"
         
-        val logLine = "Timestamp: ${java.time.LocalDateTime.now()}\nDatabase: $dbName\nQuery: $query\nResult:\n$resultStr\n"
-        val data = logLine.toByteArray(java.nio.charset.StandardCharsets.UTF_8)
+        val logJson = buildString {
+            append("{")
+            append("\"timestamp\":").append(toJsonString(now.toString())).append(',')
+            append("\"database\":").append(toJsonString(dbName)).append(',')
+            append("\"query\":").append(toJsonString(query)).append(',')
+            append("\"result\":").append(toJsonString(resultStr))
+            append("}\n")
+        }
+        val data = logJson.toByteArray(java.nio.charset.StandardCharsets.UTF_8)
 
         try {
             val shareClient = com.azure.storage.file.share.ShareClientBuilder()
@@ -311,16 +333,19 @@ class DatabaseService {
                 .shareName(shareName)
                 .buildClient()
 
-            val rootDirClient = shareClient.getDirectoryClient(directoryName)
+            val rootDirClient = shareClient.getDirectoryClient(baseLogDirectory)
             if (!rootDirClient.exists()) rootDirClient.create()
-            
-            val queriesDirClient = rootDirClient.getSubdirectoryClient("queries")
-            if (!queriesDirClient.exists()) queriesDirClient.create()
-            
-            val dbDirClient = queriesDirClient.getSubdirectoryClient(dbName.lowercase())
-            if (!dbDirClient.exists()) dbDirClient.create()
 
-            val fileClient = dbDirClient.getFileClient(specificFileName)
+            val yearDirClient = rootDirClient.getSubdirectoryClient(year)
+            if (!yearDirClient.exists()) yearDirClient.create()
+
+            val monthDirClient = yearDirClient.getSubdirectoryClient(month)
+            if (!monthDirClient.exists()) monthDirClient.create()
+
+            val dayDirClient = monthDirClient.getSubdirectoryClient(day)
+            if (!dayDirClient.exists()) dayDirClient.create()
+
+            val fileClient = dayDirClient.getFileClient(specificFileName)
             fileClient.create(data.size.toLong())
 
             val options = com.azure.storage.file.share.models.ShareFileUploadRangeOptions(java.io.ByteArrayInputStream(data), data.size.toLong()).setOffset(0)

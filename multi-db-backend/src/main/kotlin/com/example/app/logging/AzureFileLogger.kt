@@ -23,6 +23,17 @@ class AzureFileLogger(
     private val consoleLogger = ConsoleLogger()
     private val logger = KotlinLogging.logger {}
 
+    private fun toJsonString(value: String): String {
+        // Minimal JSON escaping for NDJSON output.
+        val escaped = value
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t")
+        return "\"$escaped\""
+    }
+
     override fun log(level: LogLevel, message: String, throwable: Throwable?) {
         // Always log to console first
         consoleLogger.log(level, message, throwable)
@@ -40,8 +51,16 @@ class AzureFileLogger(
 
     private fun logToAzureStorage(level: LogLevel, message: String, throwable: Throwable?) {
         val timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        val logLine = "[$timestamp] [$level] $message${throwable?.let { "\n${it.stackTraceToString()}" } ?: ""}\n"
-        val data = logLine.toByteArray(StandardCharsets.UTF_8)
+        val throwableText = throwable?.stackTraceToString()
+        val logJsonLine = buildString {
+            append("{")
+            append("\"timestamp\":").append(toJsonString(timestamp)).append(',')
+            append("\"level\":").append(toJsonString(level.name)).append(',')
+            append("\"message\":").append(toJsonString(message)).append(',')
+            append("\"throwable\":").append(throwableText?.let { toJsonString(it) } ?: "null")
+            append("}\n")
+        }
+        val data = logJsonLine.toByteArray(StandardCharsets.UTF_8)
 
         try {
             val shareClient = ShareClientBuilder()
@@ -50,9 +69,17 @@ class AzureFileLogger(
                 .shareName(shareName)
                 .buildClient()
 
-            val dirClient = shareClient.getDirectoryClient(directoryName)
-            if (!dirClient.exists()) {
-                dirClient.create()
+            // Support nested directories like: baseDir/year/month/day
+            val parts = directoryName.split('/').filter { it.isNotBlank() }
+            val dirClient: com.azure.storage.file.share.ShareDirectoryClient = run {
+                var current = shareClient.getDirectoryClient(parts.first())
+                if (!current.exists()) current.create()
+                for (i in 1 until parts.size) {
+                    val sub = current.getSubdirectoryClient(parts[i])
+                    if (!sub.exists()) sub.create()
+                    current = sub
+                }
+                current
             }
 
             val fileClient = dirClient.getFileClient(fileName)

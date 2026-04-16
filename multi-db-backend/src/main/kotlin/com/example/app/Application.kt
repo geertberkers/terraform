@@ -93,13 +93,16 @@ fun Application.module() {
 }
 
 private fun initializeLogger() {
-    val timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))
     val storageAccount = System.getenv("AZURE_STORAGE_ACCOUNT")
     val fileShare = System.getenv("AZURE_FILE_SHARE") ?: "logs"
     val baseLogDirectory = System.getenv("AZURE_LOG_DIRECTORY") ?: "app-logs"
-    val logDirectory = "$baseLogDirectory/$timestamp"
+    val now = java.time.LocalDateTime.now()
+    val logDirectory = "$baseLogDirectory/${now.year}/${now.monthValue.toString().padStart(2, '0')}/${now.dayOfMonth.toString().padStart(2, '0')}"
     val storageKey = System.getenv("AZURE_STORAGE_KEY")
-    val logFileName = System.getenv("AZURE_LOG_FILENAME") ?: "app.log"
+    // Always write to <baseLogDirectory>/<year>/<month>/<day>/<time>.json
+    // to keep Azure Files browsing organized.
+    val timePart = now.format(java.time.format.DateTimeFormatter.ofPattern("HHmmss_SSS"))
+    val logFileName = "$timePart.json"
 
     val logger = if (storageAccount != null && storageAccount.isNotEmpty()) {
         try {
