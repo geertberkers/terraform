@@ -209,13 +209,13 @@ module "logging" {
 module "dns" {
   source = "./modules/dns"
 
-  zone_name                  = var.dns_zone_name
-  dns_resource_group_name    = "rg-terraform-app-service-westeurope"
-  app_resource_group_name    = "rg-terraform-app-service-westeurope"
-  subdomain_name             = var.dns_subdomain
-  custom_domain_name         = var.custom_domain_name
-  app_hostname               = module.app_service.default_hostname
-  app_service_name           = module.app_service.app_name
+  zone_name               = var.dns_zone_name
+  dns_resource_group_name = "rg-terraform-app-service-westeurope"
+  app_resource_group_name = "rg-terraform-app-service-westeurope"
+  subdomain_name          = var.dns_subdomain
+  custom_domain_name      = var.custom_domain_name
+  app_hostname            = module.app_service.default_hostname
+  app_service_name        = module.app_service.app_name
 }
 
 # =========================
@@ -224,14 +224,14 @@ module "dns" {
 module "dns_free" {
   source = "./modules/dns"
 
-  zone_name                  = var.dns_zone_name
-  dns_resource_group_name    = "rg-terraform-app-service-westeurope"  # Main RG where zone exists
-  app_resource_group_name    = azurerm_resource_group.app_service_free_rg.name  # Free tier app RG
-  subdomain_name             = "free" # Separate subdomain for free tier
-  custom_domain_name         = "free.${var.dns_zone_name}"
-  app_hostname               = module.app_service_free.default_hostname
-  app_service_name           = module.app_service_free.app_name
-  domain_verification_value  = "601cc3e67399002c0fe3e5b9688bb2cf67ceaaf7accf07ca47bcaad1e988200e"
+  zone_name                 = var.dns_zone_name
+  dns_resource_group_name   = "rg-terraform-app-service-westeurope"           # Main RG where zone exists
+  app_resource_group_name   = azurerm_resource_group.app_service_free_rg.name # Free tier app RG
+  subdomain_name            = "free"                                          # Separate subdomain for free tier
+  custom_domain_name        = "free.${var.dns_zone_name}"
+  app_hostname              = module.app_service_free.default_hostname
+  app_service_name          = module.app_service_free.app_name
+  domain_verification_value = "601cc3e67399002c0fe3e5b9688bb2cf67ceaaf7accf07ca47bcaad1e988200e"
 
   depends_on = [azurerm_resource_group.app_service_free_rg, module.dns]
 }
