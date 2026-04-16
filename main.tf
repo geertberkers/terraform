@@ -237,7 +237,7 @@ module "databases" {
 module "aks_cheap" {
   source              = "./modules/aks"
   resource_group_name = "rg-terraform-aks-cheap"
-  location            = "germanywestcentral"
+  location            = "westeurope"
   name_prefix         = "cheap-k8s"
 }
 
