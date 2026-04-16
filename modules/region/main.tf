@@ -17,21 +17,40 @@ resource "azurerm_subnet" "subnet" {
   address_prefixes     = [var.subnet_cidr]
 }
 
-# Public IPs
+# -------------------------
+# ONE Public IP (instead of 2)
+# -------------------------
 resource "azurerm_public_ip" "ip" {
-  count               = 2
-  name                = "ip-${var.prefix}-${count.index}"
+  name                = "ip-${var.prefix}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   allocation_method   = "Static"
   sku                 = "Standard"
+}
 
-  lifecycle {
-    prevent_destroy = true
+# -------------------------
+# Load Balancer
+# -------------------------
+resource "azurerm_lb" "lb" {
+  name                = "lb-${var.prefix}"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  sku                 = "Standard"
+
+  frontend_ip_configuration {
+    name                 = "public"
+    public_ip_address_id = azurerm_public_ip.ip.id
   }
 }
 
-# NICs
+resource "azurerm_lb_backend_address_pool" "pool" {
+  loadbalancer_id = azurerm_lb.lb.id
+  name            = "backend-pool"
+}
+
+# -------------------------
+# NICs (no public IP anymore)
+# -------------------------
 resource "azurerm_network_interface" "nic" {
   count               = 2
   name                = "nic-${var.prefix}-${count.index}"
@@ -42,11 +61,37 @@ resource "azurerm_network_interface" "nic" {
     name                          = "ipconfig"
     subnet_id                     = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.ip[count.index].id
+
+    load_balancer_backend_address_pools_ids = [
+      azurerm_lb_backend_address_pool.pool.id
+    ]
   }
 }
 
-# VMs
+# -------------------------
+# NAT rules (SSH per VM)
+# -------------------------
+resource "azurerm_lb_nat_rule" "ssh" {
+  count                          = 2
+  name                           = "ssh-${count.index}"
+  resource_group_name            = azurerm_resource_group.rg.name
+  loadbalancer_id                = azurerm_lb.lb.id
+  protocol                       = "Tcp"
+  frontend_port                  = 5000 + count.index
+  backend_port                   = 22
+  frontend_ip_configuration_name = "public"
+}
+
+resource "azurerm_network_interface_nat_rule_association" "ssh" {
+  count                 = 2
+  network_interface_id  = azurerm_network_interface.nic[count.index].id
+  ip_configuration_name = "ipconfig"
+  nat_rule_id           = azurerm_lb_nat_rule.ssh[count.index].id
+}
+
+# -------------------------
+# VMs (unchanged)
+# -------------------------
 resource "azurerm_linux_virtual_machine" "vm" {
   count               = 2
   name                = "vm-${var.prefix}-${count.index}"
@@ -63,7 +108,6 @@ resource "azurerm_linux_virtual_machine" "vm" {
   admin_ssh_key {
     username   = "azureuser"
     public_key = var.ssh_public_key
-    #    public_key = file("${path.module}/../../id_rsa.pub")
   }
 
   os_disk {
@@ -78,4 +122,14 @@ resource "azurerm_linux_virtual_machine" "vm" {
     sku       = "22_04-lts"
     version   = "latest"
   }
+}
+
+# -------------------------
+# OUTPUT
+# -------------------------
+output "ssh_commands" {
+  value = [
+    "ssh azureuser@${azurerm_public_ip.ip.ip_address} -p 5000",
+    "ssh azureuser@${azurerm_public_ip.ip.ip_address} -p 5001"
+  ]
 }
