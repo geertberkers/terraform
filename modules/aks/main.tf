@@ -19,4 +19,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   identity {
     type = "SystemAssigned"
   }
+
+  # Enable OIDC issuer to prevent disablement issues
+  oidc_issuer_enabled = true
 }
