@@ -35,3 +35,22 @@ output "ssl_certificate_binding_id" {
 output "managed_certificate_id" {
   value = module.dns.managed_certificate_id
 }
+
+# =========================
+# REGION (SSH / IP)
+# =========================
+output "switzerland_public_ip" {
+  value = module.switzerland.public_ip
+}
+
+output "switzerland_ssh_commands" {
+  value = module.switzerland.ssh_commands
+}
+
+output "sweden_public_ip" {
+  value = module.sweden.public_ip
+}
+
+output "sweden_ssh_commands" {
+  value = module.sweden.ssh_commands
+}
