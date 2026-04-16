@@ -137,6 +137,9 @@ resource "azurerm_linux_virtual_machine" "vm" {
   location            = azurerm_resource_group.rg.location
   size                = var.vm_sizes[count.index]
 
+  # Needed so VM extensions can execute commands.
+  provision_vm_agent = true
+
   admin_username = "azureuser"
 
   network_interface_ids = [
@@ -147,6 +150,26 @@ resource "azurerm_linux_virtual_machine" "vm" {
     username   = "azureuser"
     public_key = var.ssh_public_key
   }
+
+  # Cloud-init to ensure SSH is actually running/listening on first boot.
+  # This prevents LB NAT forwarding from timing out when a VM image doesn't have
+  # `openssh-server` enabled by default.
+  custom_data = base64encode(<<-EOT
+    #cloud-config
+    package_update: true
+    packages:
+      - openssh-server
+    runcmd:
+      # Enable SSH service (distros sometimes use `ssh` vs `sshd`)
+      - [ bash, -lc, "systemctl enable --now ssh 2>/dev/null || systemctl enable --now sshd 2>/dev/null || true" ]
+      # Ensure sshd listens on port 22
+      - [ bash, -lc, "sed -i -e 's/^#\\?Port[[:space:]].*/Port 22/' /etc/ssh/sshd_config 2>/dev/null || true" ]
+      # If UFW is installed, allow inbound SSH.
+      - [ bash, -lc, "ufw allow 22/tcp 2>/dev/null || true" ]
+      # Restart to apply config
+      - [ bash, -lc, "systemctl restart ssh 2>/dev/null || systemctl restart sshd 2>/dev/null || true" ]
+  EOT
+  )
 
   os_disk {
     caching              = "ReadWrite"
@@ -160,4 +183,35 @@ resource "azurerm_linux_virtual_machine" "vm" {
     sku       = "22_04-lts"
     version   = "latest"
   }
+}
+
+# Ensure SSH works even for already-created VMs.
+# Azure CustomScript extension runs via the VM agent, independent from inbound SSH/NAT.
+resource "azurerm_virtual_machine_extension" "ensure_ssh" {
+  count = 2
+
+  name                 = "ensure-ssh-${var.prefix}-${count.index}"
+  virtual_machine_id  = azurerm_linux_virtual_machine.vm[count.index].id
+  publisher            = "Microsoft.Azure.Extensions"
+  type                 = "CustomScript"
+  type_handler_version = "2.1"
+
+  settings = jsonencode({
+    commandToExecute = <<-EOC
+      bash -lc '
+        set -euo pipefail
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update
+        apt-get install -y openssh-server
+        (systemctl enable --now ssh 2>/dev/null || systemctl enable --now sshd 2>/dev/null || true)
+        sed -i -e "s/^#\\?Port[[:space:]].*/Port 22/" /etc/ssh/sshd_config 2>/dev/null || true
+        command -v ufw >/dev/null 2>&1 && ufw allow 22/tcp 2>/dev/null || true
+        (systemctl restart ssh 2>/dev/null || systemctl restart sshd 2>/dev/null || true)
+      '
+    EOC
+  })
+
+  depends_on = [
+    azurerm_linux_virtual_machine.vm
+  ]
 }
