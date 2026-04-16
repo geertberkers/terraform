@@ -31,7 +31,7 @@ resource "azurerm_linux_web_app" "app" {
   key_vault_reference_identity_id = var.app_identity_id
 
   site_config {
-    always_on         = true
+    always_on         = var.service_plan_sku != "F1" ? true : false
     health_check_path = "/health"
 
     application_stack {
