@@ -22,5 +22,5 @@ variable "file_share_name" {
 variable "file_share_quota" {
   type        = number
   description = "Quota for the file share in GB"
-  default     = 50
+  default     = 5
 }
