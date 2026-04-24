@@ -51,6 +51,12 @@ variable "app_version_name" {
   default = "unknown"
 }
 
+variable "enable_aks_root_domain" {
+  type        = bool
+  description = "Whether to create a root domain A record for AKS"
+  default     = true
+}
+
 variable "app_version_code" {
   type    = string
   default = "unknown"
