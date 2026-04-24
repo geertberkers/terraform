@@ -289,7 +289,6 @@ module "aks_cheap" {
 # AKS DNS A RECORD (INGRESS)
 # =========================
 resource "azurerm_dns_a_record" "aks_ingress" {
-  count               = module.aks_cheap.ingress_public_ip != "" ? 1 : 0
   name                = "aks"
   zone_name           = var.dns_zone_name
   resource_group_name = "rg-terraform-app-service-westeurope"
@@ -301,7 +300,7 @@ resource "azurerm_dns_a_record" "aks_ingress" {
 
 # Optionally add root domain A record for AKS
 resource "azurerm_dns_a_record" "aks_root" {
-  count               = var.enable_aks_root_domain && module.aks_cheap.ingress_public_ip != "" ? 1 : 0
+  count               = 0 # Set to 1 if you want root domain pointing to AKS
   name                = "@"
   zone_name           = var.dns_zone_name
   resource_group_name = "rg-terraform-app-service-westeurope"
