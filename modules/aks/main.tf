@@ -106,6 +106,30 @@ resource "helm_release" "nginx_ingress" {
   depends_on = [kubernetes_namespace.ingress_nginx]
 }
 
+# Deploy cert-manager
+resource "kubernetes_namespace" "cert_manager" {
+  metadata {
+    name = "cert-manager"
+  }
+
+  depends_on = [azurerm_kubernetes_cluster.aks]
+}
+
+resource "helm_release" "cert_manager" {
+  name       = "cert-manager"
+  repository = "https://charts.jetstack.io"
+  chart      = "cert-manager"
+  namespace  = kubernetes_namespace.cert_manager.metadata[0].name
+  version    = "v1.13.1"
+
+  set {
+    name  = "installCRDs"
+    value = "true"
+  }
+
+  depends_on = [kubernetes_namespace.cert_manager]
+}
+
 locals {
   ingress_public_ip    = azurerm_public_ip.ingress.ip_address
   ingress_public_ip_id = azurerm_public_ip.ingress.id
