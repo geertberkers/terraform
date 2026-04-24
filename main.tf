@@ -283,8 +283,6 @@ module "aks_cheap" {
   resource_group_name = azurerm_resource_group.aks_cheap_rg.name
   location            = "westeurope"
   name_prefix         = "cheap-k8s"
-
-  depends_on = [azurerm_resource_group.aks_cheap_rg]
 }
 
 # =========================
