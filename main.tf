@@ -306,7 +306,7 @@ resource "azurerm_dns_a_record" "aks_root" {
   zone_name           = var.dns_zone_name
   resource_group_name = "rg-terraform-app-service-westeurope"
   ttl                 = 300
-  records             = [module.aks_cheap.ingress_public_ip]
+  target_resource_id  = azurerm_dns_a_record.aks_ingress[0].id
 
   depends_on = [azurerm_dns_zone.main]
 }
