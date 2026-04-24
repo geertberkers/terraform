@@ -34,8 +34,8 @@ output "custom_domain_fqdn" {
 }
 
 output "custom_domain_fqdn_free" {
-  value       = module.dns_free.cname_fqdn
-  description = "Free tier custom domain FQDN"
+  value       = try(module.dns_free[0].cname_fqdn, "")
+  description = "Free tier custom domain FQDN. Empty when free-tier custom domain binding is disabled."
 }
 
 output "ssl_certificate_binding_id" {

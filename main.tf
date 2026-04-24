@@ -233,6 +233,7 @@ module "dns" {
 # =========================
 module "dns_free" {
   source = "./modules/dns"
+  count  = var.enable_free_custom_domain ? 1 : 0
 
   zone_name               = var.dns_zone_name
   dns_resource_group_name = "rg-terraform-app-service-westeurope"           # Main RG where zone exists
