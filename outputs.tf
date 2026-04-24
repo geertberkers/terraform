@@ -83,3 +83,13 @@ output "aks_kube_config" {
   sensitive   = true
   description = "Raw Kubernetes configuration for cluster access"
 }
+
+output "aks_ingress_public_ip" {
+  value       = module.aks_cheap.ingress_public_ip
+  description = "Public IP of the NGINX ingress controller for AKS"
+}
+
+output "aks_ingress_domain" {
+  value       = "aks.${var.dns_zone_name}"
+  description = "DNS domain for accessing AKS applications"
+}

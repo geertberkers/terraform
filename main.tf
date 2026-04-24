@@ -6,6 +6,14 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.80"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.23"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.11"
+    }
     random = {
       source  = "hashicorp/random"
       version = "~> 3.0"
@@ -277,6 +285,31 @@ module "aks_cheap" {
   name_prefix         = "cheap-k8s"
 
   depends_on = [azurerm_resource_group.aks_cheap_rg]
+}
+
+# =========================
+# AKS DNS A RECORD (INGRESS)
+# =========================
+resource "azurerm_dns_a_record" "aks_ingress" {
+  name                = "aks"
+  zone_name           = var.dns_zone_name
+  resource_group_name = "rg-terraform-app-service-westeurope"
+  ttl                 = 300
+  records             = [module.aks_cheap.ingress_public_ip]
+
+  depends_on = [azurerm_dns_zone.main]
+}
+
+# Optionally add root domain A record for AKS
+resource "azurerm_dns_a_record" "aks_root" {
+  count               = 0  # Set to 1 if you want root domain pointing to AKS
+  name                = "@"
+  zone_name           = var.dns_zone_name
+  resource_group_name = "rg-terraform-app-service-westeurope"
+  ttl                 = 300
+  records             = [module.aks_cheap.ingress_public_ip]
+
+  depends_on = [azurerm_dns_zone.main]
 }
 
 
