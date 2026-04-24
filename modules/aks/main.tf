@@ -57,6 +57,21 @@ provider "helm" {
   }
 }
 
+resource "azurerm_public_ip" "ingress" {
+  name                = "${var.name_prefix}-ingress-ip"
+  location            = azurerm_resource_group.aks_rg.location
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
+# Grant AKS permission to use the Public IP
+resource "azurerm_role_assignment" "aks_network" {
+  scope                = azurerm_resource_group.aks_rg.id
+  role_definition_name = "Network Contributor"
+  principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
+}
+
 # Deploy NGINX Ingress Controller
 resource "kubernetes_namespace" "ingress_nginx" {
   metadata {
@@ -78,32 +93,19 @@ resource "helm_release" "nginx_ingress" {
   }
 
   set {
+    name  = "controller.service.loadBalancerIP"
+    value = azurerm_public_ip.ingress.ip_address
+  }
+
+  set {
     name  = "controller.service.externalTrafficPolicy"
     value = "Local"
   }
 
-  depends_on = [kubernetes_namespace.ingress_nginx]
-}
-
-# Wait for the LoadBalancer IP to be assigned
-resource "time_sleep" "wait_for_ingress" {
-  depends_on      = [helm_release.nginx_ingress]
-  create_duration = "60s"
-}
-
-# Retrieve the public IP of the ingress controller
-data "kubernetes_service" "nginx_ingress" {
-  depends_on = [time_sleep.wait_for_ingress]
-
-  metadata {
-    name      = "nginx-ingress-ingress-nginx"
-    namespace = kubernetes_namespace.ingress_nginx.metadata[0].name
-  }
+  depends_on = [kubernetes_namespace.ingress_nginx, azurerm_role_assignment.aks_network]
 }
 
 locals {
-  ingress_public_ip = coalesce(try(
-    data.kubernetes_service.nginx_ingress.status[0].load_balancer[0].ingress[0].ip,
-    ""
-  ), "")
+  ingress_public_ip    = azurerm_public_ip.ingress.ip_address
+  ingress_public_ip_id = azurerm_public_ip.ingress.id
 }

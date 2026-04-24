@@ -18,3 +18,8 @@ output "ingress_public_ip" {
   value       = local.ingress_public_ip
   description = "Public IP of the NGINX ingress controller"
 }
+
+output "ingress_public_ip_id" {
+  value       = local.ingress_public_ip_id
+  description = "Resource ID of the Public IP for Ingress"
+}
