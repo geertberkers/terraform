@@ -85,9 +85,15 @@ resource "helm_release" "nginx_ingress" {
   depends_on = [kubernetes_namespace.ingress_nginx]
 }
 
+# Wait for the LoadBalancer IP to be assigned
+resource "time_sleep" "wait_for_ingress" {
+  depends_on = [helm_release.nginx_ingress]
+  create_duration = "60s"
+}
+
 # Retrieve the public IP of the ingress controller
 data "kubernetes_service" "nginx_ingress" {
-  depends_on = [helm_release.nginx_ingress]
+  depends_on = [time_sleep.wait_for_ingress]
 
   metadata {
     name      = "nginx-ingress-ingress-nginx"
@@ -96,8 +102,8 @@ data "kubernetes_service" "nginx_ingress" {
 }
 
 locals {
-  ingress_public_ip = try(
+  ingress_public_ip = coalesce(try(
     data.kubernetes_service.nginx_ingress.status[0].load_balancer[0].ingress[0].ip,
     ""
-  )
+  ), "")
 }
