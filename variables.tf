@@ -24,6 +24,12 @@ variable "custom_domain_name" {
   default = "azure.gb-coding.nl"
 }
 
+variable "enable_free_custom_domain" {
+  type        = bool
+  description = "Whether to create a custom domain binding for the free App Service tier"
+  default     = false
+}
+
 variable "dns_zone_name" {
   type    = string
   default = "gb-coding.nl"

@@ -34,8 +34,8 @@ output "custom_domain_fqdn" {
 }
 
 output "custom_domain_fqdn_free" {
-  value       = module.dns_free.cname_fqdn
-  description = "Free tier custom domain FQDN"
+  value       = try(module.dns_free[0].cname_fqdn, "")
+  description = "Free tier custom domain FQDN. Empty when free-tier custom domain binding is disabled."
 }
 
 output "ssl_certificate_binding_id" {
@@ -82,4 +82,14 @@ output "aks_kube_config" {
   value       = module.aks_cheap.kube_config_raw
   sensitive   = true
   description = "Raw Kubernetes configuration for cluster access"
+}
+
+output "aks_ingress_public_ip" {
+  value       = module.aks_cheap.ingress_public_ip
+  description = "Public IP of the NGINX ingress controller for AKS"
+}
+
+output "aks_ingress_domain" {
+  value       = "aks.${var.dns_zone_name}"
+  description = "DNS domain for accessing AKS applications"
 }

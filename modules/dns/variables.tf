@@ -3,9 +3,14 @@ variable "zone_name" {
   description = "The name of the DNS zone (e.g., gb-coding.nl)"
 }
 
-variable "resource_group_name" {
+variable "dns_resource_group_name" {
   type        = string
-  description = "The resource group to deploy DNS resources to"
+  description = "The resource group where the DNS zone exists"
+}
+
+variable "app_resource_group_name" {
+  type        = string
+  description = "The resource group where the app service is located"
 }
 
 variable "subdomain_name" {
@@ -32,4 +37,10 @@ variable "ttl" {
   type        = number
   description = "Time to live for the DNS record"
   default     = 300
+}
+
+variable "domain_verification_value" {
+  type        = string
+  description = "The domain verification value for custom domain binding"
+  default     = ""
 }

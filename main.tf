@@ -6,9 +6,21 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.80"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.23"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.11"
+    }
     random = {
       source  = "hashicorp/random"
       version = "~> 3.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.9"
     }
   }
 
@@ -79,6 +91,19 @@ resource "azurerm_user_assigned_identity" "app_identity" {
   name                = "my-web-service-identity"
   location            = "westeurope"
   resource_group_name = "rg-terraform-app-service-westeurope"
+}
+
+# =========================
+# RESOURCE GROUPS
+# =========================
+resource "azurerm_resource_group" "app_service_free_rg" {
+  name     = "rg-terraform-app-service-free-westeurope"
+  location = "westeurope"
+}
+
+resource "azurerm_resource_group" "aks_cheap_rg" {
+  name     = "rg-terraform-aks-cheap"
+  location = "westeurope"
 }
 
 # =========================
@@ -187,17 +212,28 @@ module "logging" {
 }
 
 # =========================
+# DNS ZONE (CENTRAL)
+# =========================
+resource "azurerm_dns_zone" "main" {
+  name                = var.dns_zone_name
+  resource_group_name = "rg-terraform-app-service-westeurope"
+}
+
+# =========================
 # DNS
 # =========================
 module "dns" {
   source = "./modules/dns"
 
-  zone_name           = var.dns_zone_name
-  resource_group_name = "rg-terraform-app-service-westeurope"
-  subdomain_name      = var.dns_subdomain
-  custom_domain_name  = var.custom_domain_name
-  app_hostname        = module.app_service.default_hostname
-  app_service_name    = module.app_service.app_name
+  zone_name               = var.dns_zone_name
+  dns_resource_group_name = "rg-terraform-app-service-westeurope"
+  app_resource_group_name = "rg-terraform-app-service-westeurope"
+  subdomain_name          = var.dns_subdomain
+  custom_domain_name      = var.custom_domain_name
+  app_hostname            = module.app_service.default_hostname
+  app_service_name        = module.app_service.app_name
+
+  depends_on = [azurerm_dns_zone.main]
 }
 
 # =========================
@@ -205,13 +241,17 @@ module "dns" {
 # =========================
 module "dns_free" {
   source = "./modules/dns"
+  count  = var.enable_free_custom_domain ? 1 : 0
 
-  zone_name           = var.dns_zone_name
-  resource_group_name = "rg-terraform-app-service-free-westeurope"
-  subdomain_name      = "free" # Separate subdomain for free tier
-  custom_domain_name  = "free.${var.dns_zone_name}"
-  app_hostname        = module.app_service_free.default_hostname
-  app_service_name    = module.app_service_free.app_name
+  zone_name               = var.dns_zone_name
+  dns_resource_group_name = "rg-terraform-app-service-westeurope"           # Main RG where zone exists
+  app_resource_group_name = azurerm_resource_group.app_service_free_rg.name # Free tier app RG
+  subdomain_name          = "free"                                          # Separate subdomain for free tier
+  custom_domain_name      = "free.${var.dns_zone_name}"
+  app_hostname            = module.app_service_free.default_hostname
+  app_service_name        = module.app_service_free.app_name
+
+  depends_on = [azurerm_resource_group.app_service_free_rg, azurerm_dns_zone.main]
 }
 
 # =========================
@@ -240,9 +280,34 @@ module "databases" {
 # =========================
 module "aks_cheap" {
   source              = "./modules/aks"
-  resource_group_name = "rg-terraform-aks-cheap"
+  resource_group_name = azurerm_resource_group.aks_cheap_rg.name
   location            = "westeurope"
   name_prefix         = "cheap-k8s"
+}
+
+# =========================
+# AKS DNS A RECORD (INGRESS)
+# =========================
+resource "azurerm_dns_a_record" "aks_ingress" {
+  name                = "aks"
+  zone_name           = var.dns_zone_name
+  resource_group_name = "rg-terraform-app-service-westeurope"
+  ttl                 = 300
+  records             = [module.aks_cheap.ingress_public_ip]
+
+  depends_on = [azurerm_dns_zone.main]
+}
+
+# Optionally add root domain A record for AKS
+resource "azurerm_dns_a_record" "aks_root" {
+  count               = 0  # Set to 1 if you want root domain pointing to AKS
+  name                = "@"
+  zone_name           = var.dns_zone_name
+  resource_group_name = "rg-terraform-app-service-westeurope"
+  ttl                 = 300
+  records             = [module.aks_cheap.ingress_public_ip]
+
+  depends_on = [azurerm_dns_zone.main]
 }
 
 

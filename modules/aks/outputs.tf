@@ -13,3 +13,8 @@ output "kube_config_raw" {
   sensitive   = true
   description = "Raw Kubernetes config for cluster access"
 }
+
+output "ingress_public_ip" {
+  value       = local.ingress_public_ip
+  description = "Public IP of the NGINX ingress controller"
+}
