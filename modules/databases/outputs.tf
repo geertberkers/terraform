@@ -71,3 +71,11 @@ output "sql_server_password_secret_uri" {
 output "cosmos_connection_secret_uri" {
   value = azurerm_key_vault_secret.cosmos_connection.versionless_id
 }
+
+output "key_vault_name" {
+  value = azurerm_key_vault.kv.name
+}
+
+output "tenant_id" {
+  value = data.azurerm_client_config.current.tenant_id
+}

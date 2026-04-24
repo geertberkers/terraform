@@ -15,58 +15,76 @@ spec:
     spec:
       containers:
       - name: multi-db-backend
-        image: ghcr.io/geertberkers/terraform/multi-db-backend:latest # Update with your tag
+        image: ghcr.io/geertberkers/terraform/multi-db-backend:latest
         ports:
         - containerPort: 8080
         env:
         - name: WEBSITES_PORT
           value: "8080"
         
-        # Database Connection Settings (Update with actual values)
+        # Database Connection Settings (Using values from Terraform)
         - name: POSTGRES_HOST
-          value: "your-postgres-fqdn.postgres.database.azure.com"
+          value: "pg-flex-global.postgres.database.azure.com"
         - name: POSTGRES_USER
-          value: "pgadmin"
+          value: "pgadmin" # TODO: Verify if different from pg_admin_user
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: db-secrets
               key: postgres-password
         - name: POSTGRES_DB
-          value: "app-db"
+          value: "appdb"
         - name: POSTGRES_PORT
           value: "5432"
 
         - name: MYSQL_HOST
-          value: "your-mysql-fqdn.mysql.database.azure.com"
+          value: "mysql-global.mysql.database.azure.com"
         - name: MYSQL_USER
-          value: "mysqladmin"
+          value: "mysqladmin" # TODO: Verify if different from mysql_admin_user
         - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
               name: db-secrets
               key: mysql-password
         - name: MYSQL_DB
-          value: "app-db"
+          value: "appdb"
         - name: MYSQL_PORT
           value: "3306"
 
         - name: SQL_SERVER_HOST
-          value: "your-sqlserver-fqdn.database.windows.net"
+          value: "your-sql-server-fqdn" # Random suffix in terraform
         - name: SQLSERVER_USER
-          value: "sqladmin"
+          value: "sqladmin" # TODO: Verify if different from sql_admin_user
         - name: SQLSERVER_PASSWORD
           valueFrom:
             secretKeyRef:
               name: db-secrets
               key: sqlserver-password
         - name: SQLSERVER_DB
-          value: "app-db"
+          value: "global-db"
         - name: SQLSERVER_PORT
           value: "1433"
 
         - name: COSMOS_ENDPOINT
-          value: "your-cosmos-endpoint.documents.azure.com:443/"
+          value: "your-cosmos-endpoint" # Random suffix in terraform
+        - name: COSMOS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: cosmos-connection
+        
+        volumeMounts:
+        - name: secrets-store-inline
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+
+      volumes:
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "azure-kv-db"
         
         # Resource Limits (Cheap Tier)
         resources:

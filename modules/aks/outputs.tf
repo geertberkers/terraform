@@ -23,3 +23,8 @@ output "ingress_public_ip_id" {
   value       = local.ingress_public_ip_id
   description = "Resource ID of the Public IP for Ingress"
 }
+
+output "principal_id" {
+  value       = azurerm_kubernetes_cluster.aks.identity[0].principal_id
+  description = "System-assigned principal ID of the AKS cluster"
+}

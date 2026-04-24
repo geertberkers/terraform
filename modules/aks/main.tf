@@ -35,6 +35,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   # Enable OIDC issuer to prevent disablement issues
   oidc_issuer_enabled = true
+
+  key_vault_secrets_provider {
+    secret_rotation_enabled = true
+  }
 }
 
 locals {

@@ -270,6 +270,7 @@ module "databases" {
 
   app_identity_principal_id = azurerm_user_assigned_identity.app_identity.principal_id
   app_identity_name         = azurerm_user_assigned_identity.app_identity.name
+  aks_identity_principal_id = module.aks_cheap.principal_id
 
   sql_database_name = var.sql_database_name
 }

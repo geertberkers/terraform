@@ -25,6 +25,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: multi-db-backend
+            name: homepage-service
             port:
               number: 80
