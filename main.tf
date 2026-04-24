@@ -300,7 +300,7 @@ resource "azurerm_dns_a_record" "aks_ingress" {
 
 # Optionally add root domain A record for AKS
 resource "azurerm_dns_a_record" "aks_root" {
-  count               = 0  # Set to 1 if you want root domain pointing to AKS
+  count               = 0 # Set to 1 if you want root domain pointing to AKS
   name                = "@"
   zone_name           = var.dns_zone_name
   resource_group_name = "rg-terraform-app-service-westeurope"
