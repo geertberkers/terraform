@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: multi-db-backend
+  namespace: multi-db-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: multi-db-backend
+  template:
+    metadata:
+      labels:
+        app: multi-db-backend
+    spec:
+      containers:
+      - name: multi-db-backend
+        image: ghcr.io/geertberkers/terraform/multi-db-backend:latest # Update with your tag
+        ports:
+        - containerPort: 8080
+        env:
+        - name: WEBSITES_PORT
+          value: "8080"
+        
+        # Database Connection Settings (Update with actual values)
+        - name: POSTGRES_HOST
+          value: "your-postgres-fqdn.postgres.database.azure.com"
+        - name: POSTGRES_USER
+          value: "pgadmin"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: postgres-password
+        - name: POSTGRES_DB
+          value: "app-db"
+        - name: POSTGRES_PORT
+          value: "5432"
+
+        - name: MYSQL_HOST
+          value: "your-mysql-fqdn.mysql.database.azure.com"
+        - name: MYSQL_USER
+          value: "mysqladmin"
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: mysql-password
+        - name: MYSQL_DB
+          value: "app-db"
+        - name: MYSQL_PORT
+          value: "3306"
+
+        - name: SQL_SERVER_HOST
+          value: "your-sqlserver-fqdn.database.windows.net"
+        - name: SQLSERVER_USER
+          value: "sqladmin"
+        - name: SQLSERVER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: sqlserver-password
+        - name: SQLSERVER_DB
+          value: "app-db"
+        - name: SQLSERVER_PORT
+          value: "1433"
+
+        - name: COSMOS_ENDPOINT
+          value: "your-cosmos-endpoint.documents.azure.com:443/"
+        
+        # Resource Limits (Cheap Tier)
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+        
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
