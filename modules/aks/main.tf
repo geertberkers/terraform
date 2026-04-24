@@ -87,7 +87,7 @@ resource "helm_release" "nginx_ingress" {
 
 # Wait for the LoadBalancer IP to be assigned
 resource "time_sleep" "wait_for_ingress" {
-  depends_on = [helm_release.nginx_ingress]
+  depends_on      = [helm_release.nginx_ingress]
   create_duration = "60s"
 }
 
