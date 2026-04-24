@@ -65,12 +65,9 @@ resource "azurerm_public_ip" "ingress" {
   sku                 = "Standard"
 }
 
-# Grant AKS permission to use the Public IP
-resource "azurerm_role_assignment" "aks_network" {
-  scope                = azurerm_resource_group.aks_rg.id
-  role_definition_name = "Network Contributor"
-  principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
-}
+# NOTE: Manual role assignment for "Network Contributor" on this Resource Group
+# may be required for the AKS Identity if the Ingress fails to bind to the IP.
+# (Automatic assignment skipped due to permission restrictions on the service principal).
 
 # Deploy NGINX Ingress Controller
 resource "kubernetes_namespace" "ingress_nginx" {
@@ -102,7 +99,7 @@ resource "helm_release" "nginx_ingress" {
     value = "Local"
   }
 
-  depends_on = [kubernetes_namespace.ingress_nginx, azurerm_role_assignment.aks_network]
+  depends_on = [kubernetes_namespace.ingress_nginx]
 }
 
 locals {
