@@ -6,10 +6,12 @@ on:
     paths:
       - "multi-db-backend/**"
       - ".github/workflows/deploy.yml"
+      - "kubernetes/**"
   pull_request:
     branches: ["main"]
     paths:
       - "multi-db-backend/**"
+      - "kubernetes/**"
 
 env:
   REGISTRY: ghcr.io
@@ -56,15 +58,13 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Use GitHub Actions cache for Docker BuildKit
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy:
+  deploy-app-service:
     needs: build-and-push
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-
     steps:
       - uses: actions/checkout@v4
 
@@ -78,20 +78,16 @@ jobs:
       - name: Generate deployment timestamp
         id: timestamp
         run: |
-          # Use Amsterdam time for the filename
           APP_TIME=$(TZ='Europe/Amsterdam' date +'%Y-%m-%d_%H-%M-%S')
           echo "timestamp=$APP_TIME" >> $GITHUB_OUTPUT
 
       - name: Get project version
         id: project_version
         run: |
-          # Parse version and versionCode precisely
           VERSION=$(grep "version =" ${{ env.WORKING_DIR }}/build.gradle.kts | head -n 1 | cut -d'"' -f2)
           VERSION_CODE=$(grep "val versionCode =" ${{ env.WORKING_DIR }}/build.gradle.kts | head -n 1 | awk '{print $NF}')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
-          # Debug Info
-          echo "Successfully parsed Version: $VERSION and Build Code: $VERSION_CODE"
 
       - name: Set App Settings
         uses: azure/appservice-settings@v1
@@ -99,26 +95,10 @@ jobs:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           app-settings-json: |
             [
-              {
-                "name": "DOCKER_TAG",
-                "value": "${{ github.sha }}",
-                "slotSetting": false
-              },
-              {
-                "name": "AZURE_LOG_FILENAME",
-                "value": "app-${{ steps.timestamp.outputs.timestamp }}.log",
-                "slotSetting": false
-              },
-              {
-                "name": "APP_VERSION_NAME",
-                "value": "${{ steps.project_version.outputs.version }}",
-                "slotSetting": false
-              },
-              {
-                "name": "APP_VERSION_CODE",
-                "value": "${{ steps.project_version.outputs.versionCode }}",
-                "slotSetting": false
-              }
+              { "name": "DOCKER_TAG", "value": "${{ github.sha }}", "slotSetting": false },
+              { "name": "AZURE_LOG_FILENAME", "value": "app-${{ steps.timestamp.outputs.timestamp }}.log", "slotSetting": false },
+              { "name": "APP_VERSION_NAME", "value": "${{ steps.project_version.outputs.version }}", "slotSetting": false },
+              { "name": "APP_VERSION_CODE", "value": "${{ steps.project_version.outputs.versionCode }}", "slotSetting": false }
             ]
 
       - name: Deploy to Azure Web App
@@ -126,6 +106,61 @@ jobs:
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Azure Logout
+        run: az logout
+
+  deploy-kubernetes:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+      - name: Get AKS Credentials
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: rg-terraform-aks-cheap
+          cluster-name: cheap-k8s-aks
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+
+      - name: Deploy NGINX Ingress
+        run: |
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+          helm repo update
+          # Upgrade or Install NGINX
+          helm upgrade --install nginx-ingress ingress-nginx/ingress-nginx \
+            --namespace ingress-nginx --create-namespace \
+            --set controller.service.type=LoadBalancer \
+            --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-resource-group"=rg-terraform-aks-cheap \
+            --set controller.service.externalTrafficPolicy=Local
+
+      - name: Deploy Cert-Manager
+        run: |
+          helm repo add jetstack https://charts.jetstack.io
+          helm repo update
+          helm upgrade --install cert-manager jetstack/cert-manager \
+            --namespace cert-manager --create-namespace \
+            --version v1.13.1 \
+            --set installCRDs=true
+
+      - name: Apply Kubernetes Manifests
+        run: |
+          kubectl apply -f kubernetes/namespace.yaml
+          kubectl apply -f kubernetes/cluster-issuer.yaml
+          kubectl apply -f kubernetes/secret-provider-class.yaml
+          kubectl apply -f kubernetes/deployment.yaml
+          kubectl apply -f kubernetes/service.yaml
+          kubectl apply -f kubernetes/ingress.yaml
 
       - name: Azure Logout
         run: az logout
