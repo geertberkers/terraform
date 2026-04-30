@@ -1,12 +1,8 @@
 terraform {
   required_providers {
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.23"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.11"
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 3.0"
     }
   }
 }
@@ -41,93 +37,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 }
 
-locals {
-  kube_config = yamldecode(azurerm_kubernetes_cluster.aks.kube_config_raw)
-}
-
-provider "kubernetes" {
-  host                   = local.kube_config.clusters[0].cluster.server
-  client_certificate     = base64decode(local.kube_config.users[0].user.client-certificate-data)
-  client_key             = base64decode(local.kube_config.users[0].user.client-key-data)
-  cluster_ca_certificate = base64decode(local.kube_config.clusters[0].cluster.certificate-authority-data)
-}
-
-provider "helm" {
-  kubernetes {
-    host                   = local.kube_config.clusters[0].cluster.server
-    client_certificate     = base64decode(local.kube_config.users[0].user.client-certificate-data)
-    client_key             = base64decode(local.kube_config.users[0].user.client-key-data)
-    cluster_ca_certificate = base64decode(local.kube_config.clusters[0].cluster.certificate-authority-data)
-  }
-}
-
 resource "azurerm_public_ip" "ingress" {
   name                = "${var.name_prefix}-ingress-ip"
   location            = azurerm_resource_group.aks_rg.location
   resource_group_name = azurerm_resource_group.aks_rg.name
   allocation_method   = "Static"
   sku                 = "Standard"
-}
-
-# NOTE: Manual role assignment for "Network Contributor" on this Resource Group
-# may be required for the AKS Identity if the Ingress fails to bind to the IP.
-# (Automatic assignment skipped due to permission restrictions on the service principal).
-
-# Deploy NGINX Ingress Controller
-resource "kubernetes_namespace" "ingress_nginx" {
-  metadata {
-    name = "ingress-nginx"
-  }
-
-  depends_on = [azurerm_kubernetes_cluster.aks]
-}
-
-resource "helm_release" "nginx_ingress" {
-  name       = "nginx-ingress"
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  chart      = "ingress-nginx"
-  namespace  = kubernetes_namespace.ingress_nginx.metadata[0].name
-
-  set {
-    name  = "controller.service.type"
-    value = "LoadBalancer"
-  }
-
-  set {
-    name  = "controller.service.loadBalancerIP"
-    value = azurerm_public_ip.ingress.ip_address
-  }
-
-  set {
-    name  = "controller.service.externalTrafficPolicy"
-    value = "Local"
-  }
-
-  depends_on = [kubernetes_namespace.ingress_nginx]
-}
-
-# Deploy cert-manager
-resource "kubernetes_namespace" "cert_manager" {
-  metadata {
-    name = "cert-manager"
-  }
-
-  depends_on = [azurerm_kubernetes_cluster.aks]
-}
-
-resource "helm_release" "cert_manager" {
-  name       = "cert-manager"
-  repository = "https://charts.jetstack.io"
-  chart      = "cert-manager"
-  namespace  = kubernetes_namespace.cert_manager.metadata[0].name
-  version    = "v1.13.1"
-
-  set {
-    name  = "installCRDs"
-    value = "true"
-  }
-
-  depends_on = [kubernetes_namespace.cert_manager]
 }
 
 locals {
