@@ -72,11 +72,6 @@ output "cosmos_connection_secret_uri" {
   value = azurerm_key_vault_secret.cosmos_connection.versionless_id
 }
 
-output "cosmos_connection_string" {
-  value     = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
-  sensitive = true
-}
-
 output "key_vault_name" {
   value = azurerm_key_vault.kv.name
 }

@@ -70,21 +70,23 @@ resource "azurerm_public_ip" "ingress" {
 }
 
 # NOTE: Manual role assignment for "Network Contributor" on this Resource Group
-# is required for the AKS Identity to bind the Public IP. 
-# Terraform attempt failed with 403 (insufficient permissions of the runner).
+# may be required for the AKS Identity if the Ingress fails to bind to the IP.
+# (Automatic assignment skipped due to permission restrictions on the service principal).
 
 # Deploy NGINX Ingress Controller
+resource "kubernetes_namespace" "ingress_nginx" {
+  metadata {
+    name = "ingress-nginx"
+  }
+
+  depends_on = [azurerm_kubernetes_cluster.aks]
+}
+
 resource "helm_release" "nginx_ingress" {
-  name             = "nginx-ingress"
-  repository       = "https://kubernetes.github.io/ingress-nginx"
-  chart            = "ingress-nginx"
-  namespace        = "ingress-nginx"
-  create_namespace = true
-  force_update     = true
-  cleanup_on_fail  = true
-  recreate_pods    = true
-  replace          = true # Force replacement if name is already in use
-  timeout          = 900  # Increase timeout to 15 minutes for LoadBalancer IP assignment
+  name       = "nginx-ingress"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  namespace  = kubernetes_namespace.ingress_nginx.metadata[0].name
 
   set {
     name  = "controller.service.type"
@@ -101,41 +103,31 @@ resource "helm_release" "nginx_ingress" {
     value = "Local"
   }
 
-  depends_on = [azurerm_kubernetes_cluster.aks]
+  depends_on = [kubernetes_namespace.ingress_nginx]
 }
 
 # Deploy cert-manager
+resource "kubernetes_namespace" "cert_manager" {
+  metadata {
+    name = "cert-manager"
+  }
+
+  depends_on = [azurerm_kubernetes_cluster.aks]
+}
+
 resource "helm_release" "cert_manager" {
-  name             = "cert-manager"
-  repository       = "https://charts.jetstack.io"
-  chart            = "cert-manager"
-  namespace        = "cert-manager"
-  create_namespace = true
-  version          = "v1.13.1"
-  force_update     = true
-  cleanup_on_fail  = true
-  atomic           = true
-  replace          = true # Force replacement if resources already exist
+  name       = "cert-manager"
+  repository = "https://charts.jetstack.io"
+  chart      = "cert-manager"
+  namespace  = kubernetes_namespace.cert_manager.metadata[0].name
+  version    = "v1.13.1"
 
   set {
     name  = "installCRDs"
     value = "true"
   }
 
-  depends_on = [azurerm_kubernetes_cluster.aks]
-}
-
-resource "time_sleep" "wait_for_cert_manager" {
-  depends_on      = [helm_release.cert_manager]
-  create_duration = "60s"
-}
-
-resource "null_resource" "apply_letsencrypt_issuer" {
-  depends_on = [helm_release.cert_manager, time_sleep.wait_for_cert_manager]
-
-  provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/../../kubernetes/cluster-issuer.yaml"
-  }
+  depends_on = [kubernetes_namespace.cert_manager]
 }
 
 locals {
