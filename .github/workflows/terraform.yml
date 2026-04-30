@@ -158,5 +158,10 @@ jobs:
           envsubst < kubernetes/secret-provider-class.yaml > kubernetes/secret-provider-class-tmp.yaml
           mv kubernetes/secret-provider-class-tmp.yaml kubernetes/secret-provider-class.yaml
           
-          # 4. Apply Kubernetes manifests
+          # 4. Ensure CRDs are installed first
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/secrets-store-csi-driver/master/charts/secrets-store-csi-driver/crds/secrets-store.csi.x-k8s.io_secretproviderclasses.yaml
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/secrets-store-csi-driver/master/charts/secrets-store-csi-driver/crds/secrets-store.csi.x-k8s.io_secretproviderclasspodstatuses.yaml
+          kubectl wait --for condition=established --timeout=120s crd/secretproviderclasses.secrets-store.csi.x-k8s.io
+          
+          # 5. Apply Kubernetes manifests
           kubectl apply -f kubernetes/
