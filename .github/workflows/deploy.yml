@@ -133,6 +133,12 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v3
 
+      - name: Unlock Stuck Helm Releases
+        run: |
+          # Delete any Helm secrets that are stuck in 'pending' status
+          kubectl delete secret -n ingress-nginx -l owner=helm,status=pending-upgrade --ignore-not-found
+          kubectl delete secret -n cert-manager -l owner=helm,status=pending-upgrade --ignore-not-found
+
       - name: Deploy NGINX Ingress
         run: |
           helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
@@ -142,7 +148,8 @@ jobs:
             --namespace ingress-nginx --create-namespace \
             --set controller.service.type=LoadBalancer \
             --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-resource-group"=rg-terraform-aks-cheap \
-            --set controller.service.externalTrafficPolicy=Local
+            --set controller.service.externalTrafficPolicy=Local \
+            --wait --timeout 5m
 
       - name: Deploy Cert-Manager
         run: |
@@ -151,7 +158,8 @@ jobs:
           helm upgrade --install cert-manager jetstack/cert-manager \
             --namespace cert-manager --create-namespace \
             --version v1.13.1 \
-            --set installCRDs=true
+            --set installCRDs=true \
+            --wait --timeout 5m
 
       - name: Prepare Manifests (Variable Substitution)
         run: |
