@@ -42,6 +42,10 @@ provider "azurerm" {
   use_oidc = true
 }
 
+resource "azurerm_resource_provider_registration" "container_apps" {
+  name = "Microsoft.App"
+}
+
 # =========================
 # SWITZERLAND
 # =========================
@@ -335,6 +339,8 @@ module "my_container_apps" {
   resource_group_name = azurerm_resource_group.ca_rg.name
   location            = "westeurope"
   name_prefix         = "myca"
+
+  depends_on = [azurerm_resource_provider_registration.container_apps]
 }
 
 resource "azurerm_dns_cname_record" "ca" {

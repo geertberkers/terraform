@@ -80,6 +80,9 @@ resource "helm_release" "nginx_ingress" {
   chart            = "ingress-nginx"
   namespace        = "ingress-nginx"
   create_namespace = true
+  force_update     = true
+  cleanup_on_fail  = true
+  recreate_pods    = true
 
   set {
     name  = "controller.service.type"
@@ -107,6 +110,8 @@ resource "helm_release" "cert_manager" {
   namespace        = "cert-manager"
   create_namespace = true
   version          = "v1.13.1"
+  force_update     = true
+  cleanup_on_fail  = true
 
   set {
     name  = "installCRDs"
