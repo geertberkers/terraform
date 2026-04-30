@@ -138,3 +138,25 @@ jobs:
           terraform apply \
             -lock-timeout=10m \
             -auto-approve tfplan
+
+      # =========================
+      # Deploy Kubernetes Manifests
+      # =========================
+      - name: Deploy Kubernetes Manifests
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          # 1. Setup kubeconfig
+          mkdir -p ~/.kube
+          terraform output -raw aks_kube_config > ~/.kube/config
+          chmod 600 ~/.kube/config
+          
+          # 2. Extract Terraform outputs for substitution
+          export TENANT_ID=$(terraform output -raw tenant_id)
+          export KEYVAULT_NAME=$(terraform output -raw key_vault_name)
+          
+          # 3. Substitute variables in secret-provider-class.yaml
+          envsubst < kubernetes/secret-provider-class.yaml > kubernetes/secret-provider-class-tmp.yaml
+          mv kubernetes/secret-provider-class-tmp.yaml kubernetes/secret-provider-class.yaml
+          
+          # 4. Apply Kubernetes manifests
+          kubectl apply -f kubernetes/

@@ -3,6 +3,14 @@ output "databases" {
   sensitive = true
 }
 
+output "tenant_id" {
+  value = module.databases.tenant_id
+}
+
+output "key_vault_name" {
+  value = module.databases.key_vault_name
+}
+
 output "database_endpoints" {
   value = {
     postgres = module.databases.postgres_fqdn
