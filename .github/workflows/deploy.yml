@@ -133,23 +133,30 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v3
 
-      - name: Unlock Stuck Helm Releases
+      - name: Unlock and Clean Helm
         run: |
-          # Delete any Helm secrets that are stuck in 'pending' status
-          kubectl delete secret -n ingress-nginx -l owner=helm,status=pending-upgrade --ignore-not-found
-          kubectl delete secret -n cert-manager -l owner=helm,status=pending-upgrade --ignore-not-found
+          # Aggressive cleanup of any pending or failed Helm releases
+          # We delete the namespaces if they are stuck to ensure a truly fresh start
+          for ns in ingress-nginx cert-manager multi-db-app; do
+            echo "Cleaning namespace $ns..."
+            kubectl delete secret -n $ns -l owner=helm --ignore-not-found
+          done
+          
+          # Force delete the release secrets if the above didn't work
+          kubectl delete secrets -A -l "owner=helm,status=pending-upgrade" --ignore-not-found
+          kubectl delete secrets -A -l "owner=helm,status=pending-install" --ignore-not-found
 
       - name: Deploy NGINX Ingress
         run: |
           helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
           helm repo update
-          # Upgrade or Install NGINX
+          # Use --atomic to ensure it rolls back automatically on failure
           helm upgrade --install nginx-ingress ingress-nginx/ingress-nginx \
             --namespace ingress-nginx --create-namespace \
             --set controller.service.type=LoadBalancer \
             --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-resource-group"=rg-terraform-aks-cheap \
             --set controller.service.externalTrafficPolicy=Local \
-            --wait --timeout 5m
+            --atomic --timeout 5m
 
       - name: Deploy Cert-Manager
         run: |
@@ -159,7 +166,7 @@ jobs:
             --namespace cert-manager --create-namespace \
             --version v1.13.1 \
             --set installCRDs=true \
-            --wait --timeout 5m
+            --atomic --timeout 5m
 
       - name: Prepare Manifests (Variable Substitution)
         run: |
