@@ -74,19 +74,12 @@ resource "azurerm_public_ip" "ingress" {
 # (Automatic assignment skipped due to permission restrictions on the service principal).
 
 # Deploy NGINX Ingress Controller
-resource "kubernetes_namespace" "ingress_nginx" {
-  metadata {
-    name = "ingress-nginx"
-  }
-
-  depends_on = [azurerm_kubernetes_cluster.aks]
-}
-
 resource "helm_release" "nginx_ingress" {
-  name       = "nginx-ingress"
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  chart      = "ingress-nginx"
-  namespace  = kubernetes_namespace.ingress_nginx.metadata[0].name
+  name             = "nginx-ingress"
+  repository       = "https://kubernetes.github.io/ingress-nginx"
+  chart            = "ingress-nginx"
+  namespace        = "ingress-nginx"
+  create_namespace = true
 
   set {
     name  = "controller.service.type"
@@ -103,31 +96,24 @@ resource "helm_release" "nginx_ingress" {
     value = "Local"
   }
 
-  depends_on = [kubernetes_namespace.ingress_nginx]
-}
-
-# Deploy cert-manager
-resource "kubernetes_namespace" "cert_manager" {
-  metadata {
-    name = "cert-manager"
-  }
-
   depends_on = [azurerm_kubernetes_cluster.aks]
 }
 
+# Deploy cert-manager
 resource "helm_release" "cert_manager" {
-  name       = "cert-manager"
-  repository = "https://charts.jetstack.io"
-  chart      = "cert-manager"
-  namespace  = kubernetes_namespace.cert_manager.metadata[0].name
-  version    = "v1.13.1"
+  name             = "cert-manager"
+  repository       = "https://charts.jetstack.io"
+  chart            = "cert-manager"
+  namespace        = "cert-manager"
+  create_namespace = true
+  version          = "v1.13.1"
 
   set {
     name  = "installCRDs"
     value = "true"
   }
 
-  depends_on = [kubernetes_namespace.cert_manager]
+  depends_on = [azurerm_kubernetes_cluster.aks]
 }
 
 locals {
