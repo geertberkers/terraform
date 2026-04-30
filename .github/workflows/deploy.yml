@@ -153,6 +153,25 @@ jobs:
             --version v1.13.1 \
             --set installCRDs=true
 
+      - name: Prepare Manifests (Variable Substitution)
+        run: |
+          # Fetch Key Vault and Tenant ID via Azure CLI
+          export TENANT_ID=$(az account show --query tenantId -o tsv)
+          export KEYVAULT_NAME=$(az keyvault list --resource-group rg-terraform-databases-europe --query "[0].name" -o tsv)
+          
+          echo "Using Tenant ID: $TENANT_ID"
+          echo "Using KeyVault: $KEYVAULT_NAME"
+          
+          # Substitute variables in manifests
+          envsubst < kubernetes/secret-provider-class.yaml > kubernetes/secret-provider-class-tmp.yaml
+          mv kubernetes/secret-provider-class-tmp.yaml kubernetes/secret-provider-class.yaml
+
+      - name: Apply Secret Store CSI Driver CRDs
+        run: |
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/secrets-store-csi-driver/master/charts/secrets-store-csi-driver/crds/secrets-store.csi.x-k8s.io_secretproviderclasses.yaml
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/secrets-store-csi-driver/master/charts/secrets-store-csi-driver/crds/secrets-store.csi.x-k8s.io_secretproviderclasspodstatuses.yaml
+          kubectl wait --for condition=established --timeout=120s crd/secretproviderclasses.secrets-store.csi.x-k8s.io
+
       - name: Apply Kubernetes Manifests
         run: |
           kubectl apply -f kubernetes/namespace.yaml

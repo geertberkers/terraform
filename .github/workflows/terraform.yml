@@ -6,6 +6,8 @@ on:
       - main
     paths-ignore:
       - ".github/workflows/deploy.yml"
+      - "kubernetes/**"
+      - "multi-db-backend/**"
 
   pull_request:
 
@@ -52,6 +54,8 @@ jobs:
         with:
           path: ~/bin/sqlcmd
           key: ${{ runner.os }}-sqlcmd-v1.6.0
+          restore-keys: |
+            ${{ runner.os }}-sqlcmd-
 
       - name: Install go-sqlcmd
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.cache-sqlcmd.outputs.cache-hit != 'true'
@@ -139,29 +143,5 @@ jobs:
             -lock-timeout=10m \
             -auto-approve tfplan
 
-      # =========================
-      # Deploy Kubernetes Manifests
-      # =========================
-      - name: Deploy Kubernetes Manifests
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
-          # 1. Setup kubeconfig
-          mkdir -p ~/.kube
-          terraform output -raw aks_kube_config > ~/.kube/config
-          chmod 600 ~/.kube/config
-          
-          # 2. Extract Terraform outputs for substitution
-          export TENANT_ID=$(terraform output -raw tenant_id)
-          export KEYVAULT_NAME=$(terraform output -raw key_vault_name)
-          
-          # 3. Substitute variables in secret-provider-class.yaml
-          envsubst < kubernetes/secret-provider-class.yaml > kubernetes/secret-provider-class-tmp.yaml
-          mv kubernetes/secret-provider-class-tmp.yaml kubernetes/secret-provider-class.yaml
-          
-          # 4. Ensure CRDs are installed first
-          kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/secrets-store-csi-driver/master/charts/secrets-store-csi-driver/crds/secrets-store.csi.x-k8s.io_secretproviderclasses.yaml
-          kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/secrets-store-csi-driver/master/charts/secrets-store-csi-driver/crds/secrets-store.csi.x-k8s.io_secretproviderclasspodstatuses.yaml
-          kubectl wait --for condition=established --timeout=120s crd/secretproviderclasses.secrets-store.csi.x-k8s.io
-          
-          # 5. Apply Kubernetes manifests
-          kubectl apply -f kubernetes/
+      - name: Azure Logout
+        run: az logout

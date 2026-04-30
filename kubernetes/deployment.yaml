@@ -26,7 +26,7 @@ spec:
         - name: POSTGRES_HOST
           value: "pg-flex-global.postgres.database.azure.com"
         - name: POSTGRES_USER
-          value: "pgadmin" # TODO: Verify if different from pg_admin_user
+          value: "pgadmin" 
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -40,7 +40,7 @@ spec:
         - name: MYSQL_HOST
           value: "mysql-global.mysql.database.azure.com"
         - name: MYSQL_USER
-          value: "mysqladmin" # TODO: Verify if different from mysql_admin_user
+          value: "mysqladmin" 
         - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -52,9 +52,9 @@ spec:
           value: "3306"
 
         - name: SQL_SERVER_HOST
-          value: "your-sql-server-fqdn" # Random suffix in terraform
+          value: "your-sql-server-fqdn" 
         - name: SQLSERVER_USER
-          value: "sqladmin" # TODO: Verify if different from sql_admin_user
+          value: "sqladmin" 
         - name: SQLSERVER_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -66,7 +66,7 @@ spec:
           value: "1433"
 
         - name: COSMOS_ENDPOINT
-          value: "your-cosmos-endpoint" # Random suffix in terraform
+          value: "your-cosmos-endpoint" 
         - name: COSMOS_CONNECTION_STRING
           valueFrom:
             secretKeyRef:
@@ -78,14 +78,6 @@ spec:
           mountPath: "/mnt/secrets-store"
           readOnly: true
 
-      volumes:
-        - name: secrets-store-inline
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: "azure-kv-db"
-        
         # Resource Limits (Cheap Tier)
         resources:
           limits:
@@ -107,3 +99,11 @@ spec:
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10
+
+      volumes:
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "azure-kv-db"
