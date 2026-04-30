@@ -21,7 +21,7 @@ resource "azurerm_container_app" "app" {
 
   template {
     container {
-      name   = "multi-db-backend"
+      name   = "app"
       image  = "ghcr.io/geertberkers/terraform/multi-db-backend:${var.docker_image_tag}"
       cpu    = 0.5
       memory = "1.0Gi"

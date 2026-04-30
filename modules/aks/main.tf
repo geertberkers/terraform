@@ -125,6 +125,36 @@ resource "helm_release" "cert_manager" {
   depends_on = [azurerm_kubernetes_cluster.aks]
 }
 
+resource "kubernetes_manifest" "letsencrypt_issuer" {
+  manifest = {
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata = {
+      name = "letsencrypt-prod"
+    }
+    spec = {
+      acme = {
+        server = "https://acme-v02.api.letsencrypt.org/directory"
+        email  = "info@gb-coding.nl"
+        privateKeySecretRef = {
+          name = "letsencrypt-prod-account-key"
+        }
+        solvers = [
+          {
+            http01 = {
+              ingress = {
+                class = "nginx"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+
+  depends_on = [helm_release.cert_manager]
+}
+
 locals {
   ingress_public_ip    = azurerm_public_ip.ingress.ip_address
   ingress_public_ip_id = azurerm_public_ip.ingress.id

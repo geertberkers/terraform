@@ -369,46 +369,6 @@ module "my_container_apps" {
   depends_on = [azurerm_resource_provider_registration.container_apps]
 }
 
-resource "azurerm_dns_cname_record" "ca" {
-  name                = "ca"
-  zone_name           = var.dns_zone_name
-  resource_group_name = "rg-terraform-app-service-westeurope"
-  ttl                 = 300
-  record              = module.my_container_apps.latest_revision_fqdn
-
-  depends_on = [azurerm_dns_zone.main]
-}
-
-resource "azurerm_dns_txt_record" "ca_verification" {
-  name                = "asuid.ca"
-  zone_name           = var.dns_zone_name
-  resource_group_name = "rg-terraform-app-service-westeurope"
-  ttl                 = 300
-  record {
-    value = module.my_container_apps.custom_domain_verification_id
-  }
-
-  depends_on = [azurerm_dns_zone.main]
-}
-
-resource "time_sleep" "wait_for_dns" {
-  depends_on = [
-    azurerm_dns_cname_record.ca,
-    azurerm_dns_txt_record.ca_verification
-  ]
-  create_duration = "300s" # Increased to 5 minutes to ensure global propagation
-}
-
-resource "azurerm_container_app_custom_domain" "ca_domain" {
-  name                     = "ca.${var.dns_zone_name}"
-  container_app_id         = module.my_container_apps.container_app_id
-  certificate_binding_type = "Disabled"
-
-  depends_on = [
-    time_sleep.wait_for_dns
-  ]
-}
-
 # module "my_aks" {
 #   source              = "./modules/aks"
 #   resource_group_name = "rg-terraform-aks-eu"
