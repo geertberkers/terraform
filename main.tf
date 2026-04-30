@@ -325,12 +325,50 @@ resource "azurerm_dns_a_record" "aks_root" {
 #   name_prefix         = "mywebapp"
 # }
 
-# module "my_container_apps" {
-#   source              = "./modules/container_apps"
-#   resource_group_name = "rg-terraform-ca-eu"
-#   location            = "swedencentral"
-#   name_prefix         = "myca"
-# }
+resource "azurerm_resource_group" "ca_rg" {
+  name     = "rg-terraform-ca-eu"
+  location = "westeurope"
+}
+
+module "my_container_apps" {
+  source              = "./modules/container_apps"
+  resource_group_name = azurerm_resource_group.ca_rg.name
+  location            = "westeurope"
+  name_prefix         = "myca"
+}
+
+resource "azurerm_dns_cname_record" "ca" {
+  name                = "ca"
+  zone_name           = var.dns_zone_name
+  resource_group_name = "rg-terraform-app-service-westeurope"
+  ttl                 = 300
+  record              = module.my_container_apps.latest_revision_fqdn
+
+  depends_on = [azurerm_dns_zone.main]
+}
+
+resource "azurerm_dns_txt_record" "ca_verification" {
+  name                = "asuid.ca"
+  zone_name           = var.dns_zone_name
+  resource_group_name = "rg-terraform-app-service-westeurope"
+  ttl                 = 300
+  record {
+    value = module.my_container_apps.custom_domain_verification_id
+  }
+
+  depends_on = [azurerm_dns_zone.main]
+}
+
+resource "azurerm_container_app_custom_domain" "ca_domain" {
+  name                     = "ca.${var.dns_zone_name}"
+  container_app_id         = module.my_container_apps.container_app_id
+  certificate_binding_type = "Disabled"
+
+  depends_on = [
+    azurerm_dns_cname_record.ca,
+    azurerm_dns_txt_record.ca_verification
+  ]
+}
 
 # module "my_aks" {
 #   source              = "./modules/aks"
