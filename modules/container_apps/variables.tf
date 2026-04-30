@@ -20,21 +20,33 @@ variable "docker_image_tag" {
 
 variable "postgres_fqdn" { type = string }
 variable "postgres_user" { type = string }
-variable "postgres_password" { type = string; sensitive = true }
+variable "postgres_password" { 
+  type      = string
+  sensitive = true 
+}
 variable "postgres_db" { type = string }
 
 variable "mysql_fqdn" { type = string }
 variable "mysql_user" { type = string }
-variable "mysql_password" { type = string; sensitive = true }
+variable "mysql_password" { 
+  type      = string
+  sensitive = true 
+}
 variable "mysql_db" { type = string }
 
 variable "sql_server_fqdn" { type = string }
 variable "sql_server_user" { type = string }
-variable "sql_server_password" { type = string; sensitive = true }
+variable "sql_server_password" { 
+  type      = string
+  sensitive = true 
+}
 variable "sql_server_db" { type = string }
 
 variable "cosmos_endpoint" { type = string }
-variable "cosmos_connection_string" { type = string; sensitive = true }
+variable "cosmos_connection_string" { 
+  type      = string
+  sensitive = true 
+}
 
 variable "app_identity_client_id" { type = string }
 variable "app_identity_name" { type = string }
