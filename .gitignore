@@ -16,3 +16,4 @@ bootstrap/*.tfvars
 bootstrap/*.tfvars.json
 bootstrap/.terraform.lock.hcl
 bootstrap/logs/secret.log
+/multi-db-backend/bin
