@@ -125,6 +125,11 @@ resource "helm_release" "cert_manager" {
   depends_on = [azurerm_kubernetes_cluster.aks]
 }
 
+resource "time_sleep" "wait_for_cert_manager" {
+  depends_on = [helm_release.cert_manager]
+  create_duration = "60s"
+}
+
 resource "kubernetes_manifest" "letsencrypt_issuer" {
   manifest = {
     apiVersion = "cert-manager.io/v1"
@@ -152,7 +157,7 @@ resource "kubernetes_manifest" "letsencrypt_issuer" {
     }
   }
 
-  depends_on = [helm_release.cert_manager]
+  depends_on = [time_sleep.wait_for_cert_manager]
 }
 
 locals {
