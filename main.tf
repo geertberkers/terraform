@@ -357,7 +357,7 @@ module "my_container_apps" {
   sql_server_password = module.databases.sql_server_password
   sql_server_db       = module.databases.sql_server_db
 
-  cosmos_endpoint         = module.databases.cosmos_endpoint
+  cosmos_endpoint          = module.databases.cosmos_endpoint
   cosmos_connection_string = module.databases.cosmos_connection_string
 
   app_identity_client_id = azurerm_user_assigned_identity.app_identity.client_id
