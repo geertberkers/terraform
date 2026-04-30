@@ -142,6 +142,3 @@ jobs:
           terraform apply \
             -lock-timeout=10m \
             -auto-approve tfplan
-
-      - name: Azure Logout
-        run: az logout
