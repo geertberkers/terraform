@@ -5,10 +5,10 @@ metadata:
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: admin@gb-coding.nl
+    email: info@gb-coding.nl
     privateKeySecretRef:
       name: letsencrypt-prod-account-key
     solvers:
-    - http01:
-        ingress:
-          class: nginx
+      - http01:
+          ingress:
+            class: nginx
