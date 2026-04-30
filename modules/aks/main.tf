@@ -84,7 +84,7 @@ resource "helm_release" "nginx_ingress" {
   cleanup_on_fail  = true
   recreate_pods    = true
   replace          = true # Force replacement if name is already in use
-  timeout          = 900 # Increase timeout to 15 minutes for LoadBalancer IP assignment
+  timeout          = 900  # Increase timeout to 15 minutes for LoadBalancer IP assignment
 
   set {
     name  = "controller.service.type"
