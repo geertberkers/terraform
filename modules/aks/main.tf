@@ -69,12 +69,9 @@ resource "azurerm_public_ip" "ingress" {
   sku                 = "Standard"
 }
 
-# Role assignment to allow AKS to manage the Public IP in this Resource Group
-resource "azurerm_role_assignment" "aks_network" {
-  scope                = azurerm_resource_group.aks_rg.id
-  role_definition_name = "Network Contributor"
-  principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
-}
+# NOTE: Manual role assignment for "Network Contributor" on this Resource Group
+# is required for the AKS Identity to bind the Public IP. 
+# Terraform attempt failed with 403 (insufficient permissions of the runner).
 
 # Deploy NGINX Ingress Controller
 resource "helm_release" "nginx_ingress" {
@@ -103,10 +100,7 @@ resource "helm_release" "nginx_ingress" {
     value = "Local"
   }
 
-  depends_on = [
-    azurerm_kubernetes_cluster.aks,
-    azurerm_role_assignment.aks_network
-  ]
+  depends_on = [azurerm_kubernetes_cluster.aks]
 }
 
 # Deploy cert-manager
@@ -127,10 +121,7 @@ resource "helm_release" "cert_manager" {
     value = "true"
   }
 
-  depends_on = [
-    azurerm_kubernetes_cluster.aks,
-    azurerm_role_assignment.aks_network
-  ]
+  depends_on = [azurerm_kubernetes_cluster.aks]
 }
 
 locals {

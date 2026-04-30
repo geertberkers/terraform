@@ -340,6 +340,32 @@ module "my_container_apps" {
   location            = "westeurope"
   name_prefix         = "myca"
 
+  docker_image_tag = var.docker_image_tag
+
+  postgres_fqdn     = module.databases.postgres_fqdn
+  postgres_user     = module.databases.postgres_user
+  postgres_password = module.databases.postgres_password
+  postgres_db       = module.databases.postgres_db
+
+  mysql_fqdn     = module.databases.mysql_fqdn
+  mysql_user     = module.databases.mysql_user
+  mysql_password = module.databases.mysql_password
+  mysql_db       = module.databases.mysql_db
+
+  sql_server_fqdn     = module.databases.sql_server_fqdn
+  sql_server_user     = module.databases.sql_server_user
+  sql_server_password = module.databases.sql_server_password
+  sql_server_db       = module.databases.sql_server_db
+
+  cosmos_endpoint         = module.databases.cosmos_endpoint
+  cosmos_connection_string = module.databases.cosmos_connection_string
+
+  app_identity_client_id = azurerm_user_assigned_identity.app_identity.client_id
+  app_identity_name      = azurerm_user_assigned_identity.app_identity.name
+
+  app_version_name = var.app_version_name
+  app_version_code = var.app_version_code
+
   depends_on = [azurerm_resource_provider_registration.container_apps]
 }
 
@@ -370,7 +396,7 @@ resource "time_sleep" "wait_for_dns" {
     azurerm_dns_cname_record.ca,
     azurerm_dns_txt_record.ca_verification
   ]
-  create_duration = "60s"
+  create_duration = "300s" # Increased to 5 minutes to ensure global propagation
 }
 
 resource "azurerm_container_app_custom_domain" "ca_domain" {
