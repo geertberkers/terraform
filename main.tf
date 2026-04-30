@@ -365,14 +365,21 @@ resource "azurerm_dns_txt_record" "ca_verification" {
   depends_on = [azurerm_dns_zone.main]
 }
 
+resource "time_sleep" "wait_for_dns" {
+  depends_on = [
+    azurerm_dns_cname_record.ca,
+    azurerm_dns_txt_record.ca_verification
+  ]
+  create_duration = "60s"
+}
+
 resource "azurerm_container_app_custom_domain" "ca_domain" {
   name                     = "ca.${var.dns_zone_name}"
   container_app_id         = module.my_container_apps.container_app_id
   certificate_binding_type = "Disabled"
 
   depends_on = [
-    azurerm_dns_cname_record.ca,
-    azurerm_dns_txt_record.ca_verification
+    time_sleep.wait_for_dns
   ]
 }
 
