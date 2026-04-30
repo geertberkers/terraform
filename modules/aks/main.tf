@@ -130,34 +130,12 @@ resource "time_sleep" "wait_for_cert_manager" {
   create_duration = "60s"
 }
 
-resource "kubernetes_manifest" "letsencrypt_issuer" {
-  manifest = {
-    apiVersion = "cert-manager.io/v1"
-    kind       = "ClusterIssuer"
-    metadata = {
-      name = "letsencrypt-prod"
-    }
-    spec = {
-      acme = {
-        server = "https://acme-v02.api.letsencrypt.org/directory"
-        email  = "info@gb-coding.nl"
-        privateKeySecretRef = {
-          name = "letsencrypt-prod-account-key"
-        }
-        solvers = [
-          {
-            http01 = {
-              ingress = {
-                class = "nginx"
-              }
-            }
-          }
-        ]
-      }
-    }
-  }
+resource "null_resource" "apply_letsencrypt_issuer" {
+  depends_on = [helm_release.cert_manager, time_sleep.wait_for_cert_manager]
 
-  depends_on = [time_sleep.wait_for_cert_manager]
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/../../kubernetes/cluster-issuer.yaml"
+  }
 }
 
 locals {
