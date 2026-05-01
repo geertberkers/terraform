@@ -146,6 +146,19 @@ jobs:
           kubectl delete secrets -A -l "owner=helm,status=pending-upgrade" --ignore-not-found
           kubectl delete secrets -A -l "owner=helm,status=pending-install" --ignore-not-found
 
+          # Fix cert-manager CRD ownership if they exist from a previous (e.g. Terraform) installation
+          # Helm refuses to install if CRDs exist but lack Helm ownership metadata
+          echo "Checking for existing cert-manager CRDs to adopt..."
+          CRDS=$(kubectl get crd -o name | grep cert-manager.io || true)
+          if [ ! -z "$CRDS" ]; then
+            for crd in $CRDS; do
+              echo "Adopting $crd..."
+              kubectl label $crd app.kubernetes.io/managed-by=Helm --overwrite
+              kubectl annotate $crd meta.helm.sh/release-name=cert-manager --overwrite
+              kubectl annotate $crd meta.helm.sh/release-namespace=cert-manager --overwrite
+            done
+          fi
+
       - name: Deploy NGINX Ingress
         run: |
           helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
